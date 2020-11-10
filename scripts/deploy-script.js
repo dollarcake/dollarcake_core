@@ -12,7 +12,7 @@ async function main() {
     //
     // If this script is run directly using `node` you may want to call compile 
     // manually to make sure everything is compiled
-    // await hre.run('compile');        
+
     let provider = ethers.getDefaultProvider(process.env.PROVIDER);
     signer = new ethers.Wallet(process.env.PRIVATE_KEY, provider);
     const Contract = await ethers.getContractFactory("Cake", signer);
