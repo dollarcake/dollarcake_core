@@ -20,7 +20,6 @@ describe("Cake token", function() {
         const supply = await contract.totalSupply();
         const formatted = ethers.utils.formatUnits(supply, 'ether');
         const comma = ethers.utils.commify(formatted);
-
         expect(formatted).to.equal("10000000.0");
     });
 
@@ -28,7 +27,6 @@ describe("Cake token", function() {
         const balance = await contract.balanceOf(signer.address);
         const formatted = ethers.utils.formatUnits(balance, 'ether');
         const comma = ethers.utils.commify(formatted);
-
         expect(formatted).to.equal("10000000.0");
     });
 
@@ -38,7 +36,6 @@ describe("Cake token", function() {
         const balance = await contract.balanceOf(signer.address);
         const formatted = ethers.utils.formatUnits(balance, 'ether');
         const comma = ethers.utils.commify(formatted);
-
         expect(formatted).to.equal("10000000.0");
         */
     });
@@ -47,7 +44,6 @@ describe("Cake token", function() {
         const balance = await contract.balanceOf(signer.address);
         const formatted = ethers.utils.formatUnits(balance, 'ether');
         const comma = ethers.utils.commify(formatted);
-
-        expect(formatted).to.equal("10000000.0");
+        expect(formatted).to.equal("9999900.0");
     });
 });
