@@ -26,7 +26,6 @@ contract Cake is ERC20 {
         view
         returns (address payable)
     {
-        console.log("----------------------", msg.sender);
         if (msg.sender != _relayHub) {
             return msg.sender;
         } else {
@@ -65,7 +64,6 @@ contract Cake is ERC20 {
         // These fields are not accessible from assembly
         bytes memory array = msg.data;
         uint256 index = msg.data.length;
-
         // solhint-disable-next-line no-inline-assembly
         assembly {
             // Load the 32 bytes word from memory with the address on the lower 20 bytes, and mask those.
@@ -74,7 +72,6 @@ contract Cake is ERC20 {
                 0xffffffffffffffffffffffffffffffffffffffff
             )
         }
-        console.log(result);
         return result;
     }
 

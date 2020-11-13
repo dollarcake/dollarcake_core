@@ -31,7 +31,7 @@ describe("Cake token", function() {
     });
 
     it("Test transfer", async function() {
-        contract.transfer("0x70997970c51812dc3a010c7d01b50e0d17dc79c8", ethers.utils.parseUnits("100.0", 'ether').toString());
+        await contract.transfer("0x70997970c51812dc3a010c7d01b50e0d17dc79c8", ethers.utils.parseUnits("100.0", 'ether').toString());
         /*
         const balance = await contract.balanceOf(signer.address);
         const formatted = ethers.utils.formatUnits(balance, 'ether');
