@@ -10,6 +10,7 @@
   "license": "ISC",
   "dependencies": {
     "@chainlink/contracts": "0.0.11",
+    "@opengsn/gsn": "^2.0.1",
     "@openzeppelin/contracts": "^3.2.0",
     "dotenv": "^8.2.0",
     "hardhat": "^2.0.2",
