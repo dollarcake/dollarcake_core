@@ -3,15 +3,13 @@ pragma solidity ^0.6.0;
 
 import "hardhat/console.sol";
 
-import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
-
-contract Cake is ERC20 {
-    constructor() public ERC20("Baking", "BAKE") {
-        _mint(msg.sender, 10000000e18);
+contract GasStation {
+    constructor(address relayHub) public {
+        _relayHub = relayHub;
     }
 
     // Default RelayHub address, deployed on mainnet and all testnets at the same address
-    address private _relayHub = 0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266;
+    address private _relayHub;
 
     /**
      * @dev Replacement for msg.sender. Returns the actual sender of a transaction: msg.sender for regular transactions,
@@ -22,7 +20,6 @@ contract Cake is ERC20 {
     function _msgSender()
         internal
         virtual
-        override
         view
         returns (address payable)
     {
@@ -39,7 +36,7 @@ contract Cake is ERC20 {
      *
      * IMPORTANT: Contracts derived from {GSNRecipient} should never use `msg.data`, and use {_msgData} instead.
      */
-    function _msgData() internal virtual override view returns (bytes memory) {
+    function _msgData() internal virtual view returns (bytes memory) {
         if (msg.sender != _relayHub) {
             return msg.data;
         } else {

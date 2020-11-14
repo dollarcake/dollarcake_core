@@ -2,45 +2,33 @@ const { expect } = require("chai");
 const { ethers } = require("hardhat");
 
 describe("Forwarder contract", function() {
-    let accounts;
-    let provider = ethers.getDefaultProvider('http://localhost:8545');
-    let signer;
-    let contract;
+    let token;
+    let owner, alice, bob
 
-    before(async () => {
-        accounts = await ethers.getSigners();
-        // signer = accounts[0];
-        signer = new ethers.Wallet("0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80", provider);
-        let Contract = await ethers.getContractFactory("Cake", signer);
-        contract = await Contract.deploy();
-        await contract.deployed();
-        console.log("Forwarder contract address", contract.address);
+    beforeEach(async () => {
+        [owner, alice, bob] = await ethers.getSigners();
+        let Contract = await ethers.getContractFactory("CakeToken");
+        token = await Contract.deploy(owner.address);
+        console.log("Forwarder token address", token.address);
     });
 
     it("Check token balance", async function() {
-        const balance = await contract.balanceOf(signer.address);
+        const balance = await token.balanceOf(owner.address);
         const formatted = ethers.utils.formatUnits(balance, 'ether');
         const tokens = ethers.utils.commify(formatted);
         console.log({ tokens });
         expect(formatted).to.equal("10000000.0");
     });
 
-    it("Send contract function", async function() {
-        const request = await contract.populateTransaction.transfer(accounts[2].address, '100000000000000000');
+    it("Send token from relayer function", async function() {
+        const amountToTransfer = '1'
+        const request = await token.populateTransaction.transfer(alice.address, '100000000000000000');
 
         const data = request.data.substring(0, request.data.length-20);
         request.data = data + 'f39fd6e51aad88f6f4ce6ab8827279cfffb92266';
         
-        const tx = await signer.sendTransaction(request);
-        console.log(tx);
+        const tx = await owner.sendTransaction(request);
+        const balanceOfAlice = await token.balanceOf(alice.address)
+        expect(balanceOfAlice.toString(), amountToTransfer, "bob should have one token")
     });
-
-    it("Check token balance", async function() {
-        const balance = await contract.balanceOf(signer.address);
-        const formatted = ethers.utils.formatUnits(balance, 'ether');
-        const tokens = ethers.utils.commify(formatted);
-        console.log({ tokens });
-        expect(formatted).to.equal("10000000.0");
-    });
-
 });
