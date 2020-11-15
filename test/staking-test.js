@@ -117,7 +117,7 @@ describe("staking contract", function() {
 			)
 		}
 	})
-	it.only("should deposit and withdraw alice 75% bob 25%", async function() {
+	it("should deposit and withdraw alice 75% bob 25%", async function() {
 		const aliceDeposit = 17.5 * 1e18
 		const bobDeposit = 12.5 * 1e18
 		await approve(owner, 10)
@@ -184,7 +184,7 @@ describe("staking contract", function() {
 		assert.equal(balanceOfBobAfter, bobDeposit, "alice should have original amount of tokens")
 	})
 
-	it.only("should deposit and withdraw alice 75% bob 25% while extra tokens added before bob deposits", async function() {
+	it("should deposit and withdraw alice 75% bob 25% while extra tokens added before bob deposits", async function() {
 		const aliceDeposit = 17.5 * 1e18
 		const bobDeposit = 12.5 * 1e18
 		await approve(owner, 10)
