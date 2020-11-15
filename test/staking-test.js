@@ -145,9 +145,7 @@ describe("staking contract", function() {
 		await staking.connect(bob).deposit(bobDeposit.toString())
 
 		const bobStake = await staking.userStake(bob.address)
-		console.log({
-			bobStake: bobStake.toString()
-		})
+		
 		assert.equal(bobStake.toString(), bobDeposit.toString(), "bob stake should equal deposit")
 
 		try {
@@ -214,9 +212,7 @@ describe("staking contract", function() {
 
 		const bobStake = await staking.userStake(bob.address)
 		const calculatedBobDeposit = bobDeposit / 2
-		console.log({
-			bobStake: bobStake.toString()
-		})
+		
 		assert.equal(bobStake.toString(), calculatedBobDeposit.toString(), "bob stake should equal deposit")
 
 		try {
