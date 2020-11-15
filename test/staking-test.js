@@ -2,17 +2,19 @@ const { assert } = require("chai");
 const { ethers } = require("hardhat");
 const { time } = require("@openzeppelin/test-helpers");
 const should = require("should");
+const { approveSetup, increaseTime } = require("../helpers/utils")
 
 describe("staking contract", function() {
     let factory;
-    let owner, alice, bob, relayer
+    let owner, alice, bob, relayer, approve
 
     beforeEach(async () => {
 		[owner, alice, bob, relayer] = await ethers.getSigners();
 		let Contract = await ethers.getContractFactory("CakeToken")
 		token = await Contract.deploy(relayer.address);
         Contract = await ethers.getContractFactory("CakeStaking");
-        staking = await Contract.deploy(alice.address, token.address);
+		staking = await Contract.deploy(alice.address, token.address);
+		approve = approveSetup(token, staking)
 	});
 	it("properly sets information in constructor", async function() {
 		const contentCreator = await staking.contentCreator()
@@ -115,6 +117,73 @@ describe("staking contract", function() {
 			)
 		}
 	})
+	it.only("should deposit and withdraw alice 75% bob 25%", async function() {
+		const aliceDeposit = 17.5 * 1e18
+		const bobDeposit = 12.5 * 1e18
+		await approve(owner, 10)
+		await token.transfer(alice.address, aliceDeposit.toString())
+		await token.transfer(bob.address, bobDeposit.toString())
+
+		try {
+			await staking.deposit(10)
+			should.fail("The call should have failed but didn't")
+		} catch(e) {
+			assert.equal(
+				e.message, 
+				"VM Exception while processing transaction: revert minimum first stake"
+			)
+
+		}
+
+		await approve(alice, aliceDeposit.toString())
+		await staking.connect(alice).deposit(aliceDeposit.toString())
+
+		const aliceStake = await staking.userStake(alice.address)
+		assert.equal(aliceStake, aliceDeposit, "alice stake should equal deposit")
+
+		await approve(bob, bobDeposit.toString())
+		await staking.connect(bob).deposit(bobDeposit.toString())
+
+		const bobStake = await staking.userStake(bob.address)
+		console.log({
+			bobStake: bobStake.toString()
+		})
+		assert.equal(bobStake.toString(), bobDeposit.toString(), "bob stake should equal deposit")
+
+		try {
+			await staking.connect(alice).withdraw(10)
+			should.fail("The call should have failed but didn't")
+		} catch(e) {
+			assert.equal(
+				e.message, 
+				"VM Exception while processing transaction: revert wait more time"
+			)
+
+		}
+
+		const balanceOfAliceBefore = await token.balanceOf(alice.address)
+		const balanceOfBobBefore = await token.balanceOf(bob.address)
+
+		assert.equal(balanceOfAliceBefore.toString(), "0", "alice should have no tokens")
+		assert.equal(balanceOfBobBefore.toString(), "0", "bob should have no tokens")
+
+		await increaseTime(ethers)
+		await staking.connect(alice).withdraw(aliceStake)
+		await staking.connect(bob).withdraw(bobStake)
+
+		const aliceStakeAfter = await staking.userStake(alice.address)
+		const balanceOfAliceAfter = await token.balanceOf(alice.address)
+
+		const bobStakeAfter = await staking.userStake(bob.address)
+		const balanceOfBobAfter = await token.balanceOf(bob.address)
+
+		assert.equal(aliceStakeAfter.toString(), "0", "alice should have no stake")
+		assert.equal(balanceOfAliceAfter, aliceDeposit, "alice should have original amount of tokens")
+
+		assert.equal(bobStakeAfter.toString(), "0", "bob should have no stake")
+		assert.equal(balanceOfBobAfter, bobDeposit, "alice should have original amount of tokens")
+	})
+
 
 
 })

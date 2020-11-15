@@ -17,8 +17,8 @@ contract CakeStaking {
 	CakeToken public cakeToken;
 	uint256 public timeLock;
 
-	mapping (address => uint256) userStake;
-	mapping (address => uint256) lastDeposit;
+	mapping (address => uint256) public userStake;
+	mapping (address => uint256) public lastDeposit;
 
 	event Reward(uint256 total, uint256 stakerReward, uint256 contentCreatorReward);
 	event SplitUpdated(uint256 newContentCreatorPortion, uint256 newStakerPortion);
@@ -59,11 +59,11 @@ contract CakeStaking {
 
     function deposit(uint256 _amount) public {
         // deposit cake token
+		uint256 contractBalance = cakeToken.balanceOf(address(this));
 		SafeERC20.safeTransferFrom(cakeToken, msg.sender, address(this), _amount);
 		uint256 payout;
-		uint256 contractBalance = cakeToken.balanceOf(address(this));
 		if (totalStaked == 0) {
-			require(_amount == 10 ether, "minimum first stake");
+			require(_amount >= 10 ether, "minimum first stake");
 			payout = _amount;
 		} else {
 			payout = _amount.mul(totalStaked).div(contractBalance);
@@ -78,8 +78,8 @@ contract CakeStaking {
     function withdraw(uint256 _amount) public timePassed {
 		uint256 contractBalance = cakeToken.balanceOf(address(this));
 		uint256 payout = _amount.mul(contractBalance).div(totalStaked);
-		SafeERC20.safeTransfer(cakeToken, msg.sender, _amount);
-		userStake[msg.sender] = userStake[msg.sender].sub(payout);
-		totalStaked = totalStaked.sub(payout);
+		SafeERC20.safeTransfer(cakeToken, msg.sender, payout);
+		userStake[msg.sender] = userStake[msg.sender].sub(_amount);
+		totalStaked = totalStaked.sub(_amount);
     }
 }
