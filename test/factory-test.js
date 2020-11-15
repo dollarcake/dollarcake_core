@@ -9,7 +9,7 @@ describe("factory contract", function() {
     beforeEach(async () => {
         [owner, alice, bob] = await ethers.getSigners();
         let Contract = await ethers.getContractFactory("CakeFactory");
-        factory = await Contract.deploy(bob.address);
+        factory = await Contract.deploy(bob.address, bob.address);
 	});
 	it("launch a new contract with proper constructors", async function() {
 		const tx = await factory.createCakeStaking()
@@ -18,6 +18,7 @@ describe("factory contract", function() {
 		assert.equal(ethers.utils.isAddress(stakingContracts), true, "staking contract should have been logged correctly")
 		assert.equal(count, 1, "there should be a staking contract")
 
+		//TODO make calls to check setup of staking
 		
 	})
 })
