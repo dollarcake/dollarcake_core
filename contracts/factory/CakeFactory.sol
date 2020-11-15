@@ -16,7 +16,7 @@ contract CakeFactory is GasStation {
 
     function createCakeStaking() external {
         CakeStaking staking = new CakeStaking(_msgSender(), cakeToken);
-        stakingContracts.push(address(staking));
+        stakingContracts.push(address(staking)); //TODO change to mapping
         totalStakingContracts++;
         emit NewStakingContract(address(staking), _msgSender());
     }

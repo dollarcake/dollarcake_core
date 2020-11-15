@@ -251,5 +251,6 @@ describe("staking contract", function() {
 		assert.equal(balanceOfBobAfter, bobDeposit, "alice should have original amount of tokens")
 	})
 
+	// TODO add more long form tests 
 
 })

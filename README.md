@@ -40,8 +40,8 @@ npx hardhat run scripts/deploy-script.js
 ```
 
 ## TODO 
-[] Factory 
-[] Staking contract 
+[x] Factory 
+[x] Staking contract 
 [] Only minter for GSN and staking 
 [] Global Only owner for Staking?
 [] GSN network currently allows the relayer to make any tx for anyone
