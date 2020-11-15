@@ -17,12 +17,7 @@ contract GasStation {
      *
      * IMPORTANT: Contracts derived from {GSNRecipient} should never use `msg.sender`, and use {_msgSender} instead.
      */
-    function _msgSender()
-        internal
-        virtual
-        view
-        returns (address payable)
-    {
+    function _msgSender() internal view virtual returns (address payable) {
         if (msg.sender != _relayHub) {
             return msg.sender;
         } else {
@@ -36,7 +31,7 @@ contract GasStation {
      *
      * IMPORTANT: Contracts derived from {GSNRecipient} should never use `msg.data`, and use {_msgData} instead.
      */
-    function _msgData() internal virtual view returns (bytes memory) {
+    function _msgData() internal view virtual returns (bytes memory) {
         if (msg.sender != _relayHub) {
             return msg.data;
         } else {

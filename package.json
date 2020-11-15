@@ -8,7 +8,9 @@
     "node": "hardhat node",
     "ganache": "ganache-cli -d 'relax explain knee sing action spider amused high enrich predict comfort trip'",
     "deploy": "hardhat run scripts/deploy-script.js",
-    "compile": "hardhat compile"
+    "compile": "hardhat compile",
+    "solhint": "./node_modules/.bin/solhint -f table contracts/**/*.sol contracts/*.sol",
+    "fix": "./node_modules/.bin/prettier --write contracts/**/*.sol && ./node_modules/.bin/prettier --write contracts/*.sol"
   },
   "author": "",
   "license": "ISC",
@@ -27,6 +29,9 @@
     "ethereum-waffle": "^3.2.0",
     "ethers": "^5.0.19",
     "ganache-cli": "^6.12.1",
-    "hardhat-gas-reporter": "^1.0.1"
+    "hardhat-gas-reporter": "^1.0.1",
+    "solhint": "^3.3.2",
+    "solhint-plugin-prettier": "^0.0.5",
+    "prettier-plugin-solidity": "^1.0.0-alpha.60"
   }
 }

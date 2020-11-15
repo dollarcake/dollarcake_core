@@ -2,7 +2,7 @@
 pragma solidity ^0.6.0;
 
 import "hardhat/console.sol";
-import '../gasStation/GasStation.sol';
+import "../gasStation/GasStation.sol";
 
 import "./ERC20.sol";
 
