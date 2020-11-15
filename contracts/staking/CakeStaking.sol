@@ -15,7 +15,7 @@ contract CakeStaking {
 	uint256 public stakerPortion;
 	uint256 public totalStaked;
 	CakeToken public cakeToken;
-	uint256 timeLock;
+	uint256 public timeLock;
 
 	mapping (address => uint256) userStake;
 	mapping (address => uint256) lastDeposit;
