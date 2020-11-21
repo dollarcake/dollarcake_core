@@ -104,7 +104,36 @@ describe("staking contract", function() {
 
 
 	})
+	it("should reward staking pool only", async function() {
+		const receivers = [alice.address, bob.address]
+		const amounts = ["10", "10"]
+		await approve(owner, "20")
 
+		await staking.rewardStakingPoolOnly(receivers, amounts)
+
+		const stakingBalance = await token.balanceOf(staking.address)
+		const aliceStakingBalance = await staking.creatorStaked(receivers[0])
+		const bobStakingBalance = await staking.creatorStaked(receivers[1])
+
+		assert.equal(stakingBalance.toString(), "20")
+		assert.equal(aliceStakingBalance.toString(), amounts[0])
+		assert.equal(bobStakingBalance.toString(), amounts[1])
+
+	})
+	it("should fail to reward staking pool only mismatch", async function() {
+		const receivers = [alice.address, bob.address, alice.address]
+		const amounts = ["10", "10"]
+		try {
+			await staking.rewardStakingPoolOnly(receivers, amounts)
+			should.fail("The call should have failed but didn't")
+		} catch(e) {
+			assert.equal(
+				e.message, 
+				"VM Exception while processing transaction: revert mismatch"
+			)
+
+		}
+	})
 	it("should deposit and withdraw alice 75% bob 25%", async function() {
 		const aliceDeposit = 17.5 * 1e18
 		const bobDeposit = 12.5 * 1e18

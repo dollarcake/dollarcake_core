@@ -24,6 +24,7 @@ contract CakeStaking is Global, ReentrancyGuard {
 	event SplitUpdated(address contentCreator, uint256 newStakerPortion);
 	event UserDeposit(address indexed user, address indexed contentCreator, uint256 amountDespoited, uint256 payout);
 	event UserWithdrawl(address indexed user, address indexed contentCreator, uint256 payout, uint256 amountRecieved);
+
 	modifier timePassed() {
 		require(now >= minActionTime[msg.sender], "wait more time");
 		_;
@@ -33,7 +34,7 @@ contract CakeStaking is Global, ReentrancyGuard {
 		cakeToken = CakeToken(_cakeToken); 
     }
 
-    function reward(address _contentCreator, uint256 _amount) public nonReentrant {
+    function reward(address_contentCreator, uint256 _amount) public nonReentrant {
 		uint256 _stakerSplit;
 		if (isControlingSplit) {
 			_stakerSplit = globalStakerSplit;
@@ -48,12 +49,16 @@ contract CakeStaking is Global, ReentrancyGuard {
 		emit Reward(_amount, stakerReward, contentCreatorReward);
     }
 
-	function rewardStakingPoolOnly() public nonReentrant {
-		
+	function rewardStakingPoolOnly(address[] memory _contentCreator, uint256[] memory _amount) public nonReentrant {
+		require(_contentCreator.length == _amount.length, "mismatch");
+		for (uint256 i = 0; i < _contentCreator.length; i++) { 
+		creatorStaked[_contentCreator[i]] = creatorStaked[_contentCreator[i]].add(_amount[i]);
+		SafeERC20.safeTransferFrom(cakeToken, msg.sender, address(this), _amount[i]);
+		emit Reward(_amount[i], _amount[i], 0);
+		}
 	}
 
     function setSplit(uint256 _newStakerPortion) public timePassed nonReentrant {
-		// TODO lock them for x amount of time
 		require(_newStakerPortion <= 90 && _newStakerPortion >= 10, "not in bounds");
 		stakerSplit[msg.sender] = _newStakerPortion;
 		minActionTime[msg.sender] = now.add(timeLock);
