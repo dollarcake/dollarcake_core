@@ -49,3 +49,8 @@ npx hardhat run scripts/deploy-script.js
 [x] Add re entrancy guards 
 [x] loop through reward and pool reward
 [x] add pool reward 
+
+
+## Deployed 
+* token contract address 0x250147E50698d2B43Ebd4d9e53ecB0dB50552745
+* cake contract address 0x076177A1910A60b2C42946172Fc3FC3Fd11465D9
