@@ -7,7 +7,7 @@
     "test": "hardhat test",
     "node": "hardhat node",
     "ganache": "ganache-cli -d 'relax explain knee sing action spider amused high enrich predict comfort trip'",
-    "deploy": "hardhat run scripts/deploy-script.js",
+    "deploy": "hardhat run scripts/deploy-system-script.js",
     "compile": "hardhat compile",
     "solhint": "./node_modules/.bin/solhint -f table contracts/**/*.sol contracts/*.sol",
     "fix": "./node_modules/.bin/prettier --write contracts/**/*.sol && ./node_modules/.bin/prettier --write contracts/*.sol"
