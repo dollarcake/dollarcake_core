@@ -10,18 +10,14 @@ contract CakeStaking {
 
 	using SafeMath for uint256;
 
-    // address public contentCreator;
-	// uint256 public contentCreatorPortion;
-	// uint256 public stakerPortion;
-	// uint256 public totalStaked;
 	CakeToken public cakeToken;
 	uint256 public timeLock;
 
-	mapping (address => mapping (address => uint256)) public userStake; // user to content 
+	mapping (address => mapping (address => uint256)) public userStake; // content creator to user 
 	mapping (address => uint256) public minWithdrawTime;
 	mapping (address => uint256) public stakerSplit;
-	mapping (address => uint256) public creatorStaked;
-	// mapping (address => uint256) public totalStaked; 
+	mapping (address => uint256) public creatorStaked; // amount of funds stakes for content creator
+	mapping (address => uint256) public contentTotalPayout; // amount of payouts for users of a CC
 
 	event Reward(uint256 total, uint256 stakerReward, uint256 contentCreatorReward);
 	event SplitUpdated(address contentCreator, uint256 newStakerPortion);
@@ -31,27 +27,23 @@ contract CakeStaking {
 		_;
 	}
 
-    constructor(address _contentCreator, address _cakeToken) public {
-        // contentCreator = _contentCreator;
-		// contentCreatorPortion = 50;
-		// stakerPortion = 50;
+    constructor(address _cakeToken) public {
 		cakeToken = CakeToken(_cakeToken); 
 		timeLock = 30 days;
     }
 
     function reward(address _contentCreator, uint256 _amount) public {
-		uint256 stakerReward = _amount.mul(stakerSplit[_contentCreator]).div(100);
-		uint256 fullPortion = 100;
-		uint256 contentCreatorPortion = fullPortion.sub(stakerSplit[_contentCreator]);
-		uint256 contentCreatorReward = _amount.mul(contentCreatorPortion).div(100);
-		creatorStaked[_contentCreator] = creatorStaked[_contentCreator].add(_amount);
+		uint256 stakerSplit = stakerSplit[_contentCreator] == uint256(0) ? uint256(50) : stakerSplit[_contentCreator];
+		uint256 stakerReward = _amount.mul(stakerSplit).div(100);
+		uint256 contentCreatorReward = _amount.sub(stakerReward);
+		creatorStaked[_contentCreator] = creatorStaked[_contentCreator].add(stakerReward);
 		SafeERC20.safeTransferFrom(cakeToken, msg.sender, address(this), stakerReward);
 		SafeERC20.safeTransferFrom(cakeToken, msg.sender, _contentCreator, contentCreatorReward);
 		emit Reward(_amount, stakerReward, contentCreatorReward);
     }
 
     function setSplit(address _contentCreator, uint256 _newStakerPortion) public {
-        // TODO only owner or call to a global contract?
+        // TODO only owner bool flip allows content creator
 		// TODO lock them for x amount of time
 		require(_newStakerPortion <= 90 && _newStakerPortion >= 10, "not in bounds");
 		stakerSplit[_contentCreator] = _newStakerPortion;
@@ -63,28 +55,29 @@ contract CakeStaking {
 		uint256 contractBalance = creatorStaked[_contentCreator];
 		SafeERC20.safeTransferFrom(cakeToken, msg.sender, address(this), _amount);
 		uint256 payout;
-		if (creatorStaked[_contentCreator] == 0) {
+		if (contentTotalPayout[_contentCreator] == 0) {
 			// TODO handle smallest stake maybe better
 			require(_amount >= 10 ether, "minimum first stake");
 			payout = _amount;
 		} else {
-			payout = _amount.mul(creatorStaked[_contentCreator]).div(contractBalance);
+			payout = _amount.mul(contentTotalPayout[_contentCreator]).div(contractBalance);
 		}
 		userStake[_contentCreator][msg.sender] = userStake[_contentCreator][msg.sender].add(payout);
-		creatorStaked[_contentCreator] = creatorStaked[_contentCreator].add(payout);
-		minWithdrawTime[msg.sender] = now.add(minWithdrawTime[msg.sender]);
+		contentTotalPayout[_contentCreator] = contentTotalPayout[_contentCreator].add(payout); 
+		creatorStaked[_contentCreator] = creatorStaked[_contentCreator].add(_amount);
+		minWithdrawTime[msg.sender] = now.add(timeLock);
 
 		//TODO add event
-        // write into mapping an amount to payout
         // payoutIn / payoutTot = tokenAddedInd / total token (after paying)
     }
 
     function withdraw(address _contentCreator, uint256 _userStake) public timePassed {
 		uint256 contractBalance = creatorStaked[_contentCreator];
-		uint256 payout = _userStake.mul(contractBalance).div(creatorStaked[_contentCreator]);
+		uint256 payout = _userStake.mul(contractBalance).div(contentTotalPayout[_contentCreator]);
 		SafeERC20.safeTransfer(cakeToken, msg.sender, payout);
 		userStake[_contentCreator][msg.sender] = userStake[_contentCreator][msg.sender].sub(_userStake);
-		creatorStaked[_contentCreator] = creatorStaked[_contentCreator].sub(_userStake);
+		creatorStaked[_contentCreator] = creatorStaked[_contentCreator].sub(payout);
+		contentTotalPayout[_contentCreator] = contentTotalPayout[_contentCreator].sub(_userStake);
 
 		//TODO add event
 
