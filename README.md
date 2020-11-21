@@ -47,3 +47,6 @@ npx hardhat run scripts/deploy-script.js
 [] GSN network currently allows the relayer to make any tx for anyone
 [] GSN currently overflows last input field on contract
 [] Add event tests
+[] Add re entrancy guards 
+[] loop through reward and pool reward
+[] add pool reward 

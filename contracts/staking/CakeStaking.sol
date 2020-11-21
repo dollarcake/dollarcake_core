@@ -3,15 +3,15 @@ pragma solidity ^0.6.0;
 
 import "hardhat/console.sol";
 import "../token/CakeToken.sol";
+import "../control/Global.sol";
 import '@openzeppelin/contracts/token/ERC20/SafeERC20.sol';
 import '@openzeppelin/contracts/math/SafeMath.sol';
 
-contract CakeStaking {
+contract CakeStaking is Global {
 
 	using SafeMath for uint256;
 
 	CakeToken public cakeToken;
-	uint256 public timeLock;
 
 	mapping (address => mapping (address => uint256)) public userStake; // content creator to user 
 	mapping (address => uint256) public minWithdrawTime;
@@ -33,8 +33,13 @@ contract CakeStaking {
     }
 
     function reward(address _contentCreator, uint256 _amount) public {
-		uint256 stakerSplit = stakerSplit[_contentCreator] == uint256(0) ? uint256(50) : stakerSplit[_contentCreator];
-		uint256 stakerReward = _amount.mul(stakerSplit).div(100);
+		uint256 _stakerSplit;
+		if (isControlingSplit) {
+			_stakerSplit = globalStakerSplit;
+		} else {
+			_stakerSplit = stakerSplit[_contentCreator] == uint256(0) ? uint256(50) : stakerSplit[_contentCreator];
+		}
+		uint256 stakerReward = _amount.mul(_stakerSplit).div(100);
 		uint256 contentCreatorReward = _amount.sub(stakerReward);
 		creatorStaked[_contentCreator] = creatorStaked[_contentCreator].add(stakerReward);
 		SafeERC20.safeTransferFrom(cakeToken, msg.sender, address(this), stakerReward);
@@ -42,12 +47,11 @@ contract CakeStaking {
 		emit Reward(_amount, stakerReward, contentCreatorReward);
     }
 
-    function setSplit(address _contentCreator, uint256 _newStakerPortion) public {
-        // TODO only owner bool flip allows content creator
+    function setSplit(uint256 _newStakerPortion) public {
 		// TODO lock them for x amount of time
 		require(_newStakerPortion <= 90 && _newStakerPortion >= 10, "not in bounds");
-		stakerSplit[_contentCreator] = _newStakerPortion;
-		emit SplitUpdated(_contentCreator, _newStakerPortion);
+		stakerSplit[msg.sender] = _newStakerPortion;
+		emit SplitUpdated(msg.sender, _newStakerPortion);
     }
 
     function deposit(address _contentCreator, uint256 _amount) public {
@@ -56,8 +60,7 @@ contract CakeStaking {
 		SafeERC20.safeTransferFrom(cakeToken, msg.sender, address(this), _amount);
 		uint256 payout;
 		if (contentTotalPayout[_contentCreator] == 0) {
-			// TODO handle smallest stake maybe better
-			require(_amount >= 10 ether, "minimum first stake");
+			require(_amount >= minInitialDeposit, "minimum first stake");
 			payout = _amount;
 		} else {
 			payout = _amount.mul(contentTotalPayout[_contentCreator]).div(contractBalance);

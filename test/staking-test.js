@@ -39,7 +39,8 @@ describe("staking contract", function() {
 	})
 
 	it("should reward the contract properly on 75/25 split", async function() {
-		await staking.setSplit(alice.address, 25)
+		await staking.turnOffGlobal()
+		await staking.connect(alice).setSplit(25)
 
 		const stakerPortion = await staking.stakerSplit(alice.address)
 
@@ -59,7 +60,7 @@ describe("staking contract", function() {
 	
 	it("should fail to split _newStakerPortion too high", async function() {
 		try {
-			await staking.setSplit(alice.address, 91)
+			await staking.setSplit(91)
 			should.fail("The call should have failed but didn't")
 		} catch(e) {
 			assert.equal(
@@ -70,7 +71,7 @@ describe("staking contract", function() {
 	})
 	it("should fail to split _newStakerPortion too low", async function() {
 		try {
-			await staking.setSplit(alice.address, 9)
+			await staking.setSplit(9)
 			should.fail("The call should have failed but didn't")
 		} catch(e) {
 			assert.equal(
