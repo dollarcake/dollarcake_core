@@ -21,7 +21,8 @@ contract CakeStaking is Global {
 
 	event Reward(uint256 total, uint256 stakerReward, uint256 contentCreatorReward);
 	event SplitUpdated(address contentCreator, uint256 newStakerPortion);
-
+	event UserDeposit(address indexed user, address indexed contentCreator, uint256 amountDespoited, uint256 payout);
+	event UserWithdrawl(address indexed user, address indexed contentCreator, uint256 payout, uint256 amountRecieved);
 	modifier timePassed() {
 		require(now >= minActionTime[msg.sender], "wait more time");
 		_;
@@ -73,8 +74,7 @@ contract CakeStaking is Global {
 		contentTotalPayout[_contentCreator] = contentTotalPayout[_contentCreator].add(payout); 
 		creatorStaked[_contentCreator] = creatorStaked[_contentCreator].add(_amount);
 		minActionTime[msg.sender] = now.add(timeLock);
-
-		//TODO add event
+		emit UserDeposit(msg.sender, _contentCreator, _amount, payout);
         // payoutIn / payoutTot = tokenAddedInd / total token (after paying)
     }
 
@@ -85,8 +85,6 @@ contract CakeStaking is Global {
 		userStake[_contentCreator][msg.sender] = userStake[_contentCreator][msg.sender].sub(_userStake);
 		creatorStaked[_contentCreator] = creatorStaked[_contentCreator].sub(payout);
 		contentTotalPayout[_contentCreator] = contentTotalPayout[_contentCreator].sub(_userStake);
-
-		//TODO add event
-
+		emit UserWithdrawl(msg.sender, _contentCreator, _userStake, payout);
     }
 }
