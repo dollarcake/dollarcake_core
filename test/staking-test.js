@@ -13,7 +13,7 @@ describe("staking contract", function() {
 		let Contract = await ethers.getContractFactory("CakeToken")
 		token = await Contract.deploy(relayer.address);
         Contract = await ethers.getContractFactory("CakeStaking");
-		staking = await Contract.deploy(token.address);
+		staking = await Contract.deploy(token.address, relayer.address);
 		approve = approveSetup(token, staking)
 	});
 	it("properly sets information in constructor", async function() {

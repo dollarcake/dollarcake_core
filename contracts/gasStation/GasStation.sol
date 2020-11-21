@@ -25,20 +25,6 @@ contract GasStation {
         }
     }
 
-    /**
-     * @dev Replacement for msg.data. Returns the actual calldata of a transaction: msg.data for regular transactions,
-     * and a reduced version for GSN relayed calls (where msg.data contains additional information).
-     *
-     * IMPORTANT: Contracts derived from {GSNRecipient} should never use `msg.data`, and use {_msgData} instead.
-     */
-    function _msgData() internal view virtual returns (bytes memory) {
-        if (msg.sender != _relayHub) {
-            return msg.data;
-        } else {
-            return _getRelayedCallData();
-        }
-    }
-
     function _getRelayedCallSender()
         private
         view
