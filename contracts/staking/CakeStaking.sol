@@ -34,27 +34,30 @@ contract CakeStaking is Global, ReentrancyGuard {
 		cakeToken = CakeToken(_cakeToken); 
     }
 
-    function reward(address_contentCreator, uint256 _amount) public nonReentrant {
-		uint256 _stakerSplit;
-		if (isControlingSplit) {
-			_stakerSplit = globalStakerSplit;
-		} else {
-			_stakerSplit = stakerSplit[_contentCreator] == uint256(0) ? uint256(50) : stakerSplit[_contentCreator];
+    function reward(address[] memory _contentCreator, uint256[] memory _amount) public nonReentrant {
+		require(_contentCreator.length == _amount.length, "mismatch");
+		for (uint256 i = 0; i < _contentCreator.length; i++) { 
+			uint256 _stakerSplit;
+			if (isControlingSplit) {
+				_stakerSplit = globalStakerSplit;
+			} else {
+				_stakerSplit = stakerSplit[_contentCreator[i]] == uint256(0) ? uint256(50) : stakerSplit[_contentCreator[i]];
+			}
+			uint256 stakerReward = _amount[i].mul(_stakerSplit).div(100);
+			uint256 contentCreatorReward = _amount[i].sub(stakerReward);
+			creatorStaked[_contentCreator[i]] = creatorStaked[_contentCreator[i]].add(stakerReward);
+			SafeERC20.safeTransferFrom(cakeToken, msg.sender, address(this), stakerReward);
+			SafeERC20.safeTransferFrom(cakeToken, msg.sender, _contentCreator[i], contentCreatorReward);
+			emit Reward(_amount[i], stakerReward, contentCreatorReward);
 		}
-		uint256 stakerReward = _amount.mul(_stakerSplit).div(100);
-		uint256 contentCreatorReward = _amount.sub(stakerReward);
-		creatorStaked[_contentCreator] = creatorStaked[_contentCreator].add(stakerReward);
-		SafeERC20.safeTransferFrom(cakeToken, msg.sender, address(this), stakerReward);
-		SafeERC20.safeTransferFrom(cakeToken, msg.sender, _contentCreator, contentCreatorReward);
-		emit Reward(_amount, stakerReward, contentCreatorReward);
     }
 
 	function rewardStakingPoolOnly(address[] memory _contentCreator, uint256[] memory _amount) public nonReentrant {
 		require(_contentCreator.length == _amount.length, "mismatch");
 		for (uint256 i = 0; i < _contentCreator.length; i++) { 
-		creatorStaked[_contentCreator[i]] = creatorStaked[_contentCreator[i]].add(_amount[i]);
-		SafeERC20.safeTransferFrom(cakeToken, msg.sender, address(this), _amount[i]);
-		emit Reward(_amount[i], _amount[i], 0);
+			creatorStaked[_contentCreator[i]] = creatorStaked[_contentCreator[i]].add(_amount[i]);
+			SafeERC20.safeTransferFrom(cakeToken, msg.sender, address(this), _amount[i]);
+			emit Reward(_amount[i], _amount[i], 0);
 		}
 	}
 
@@ -66,7 +69,6 @@ contract CakeStaking is Global, ReentrancyGuard {
     }
 
     function deposit(address _contentCreator, uint256 _amount) public nonReentrant {
-        // deposit cake token
 		uint256 contractBalance = creatorStaked[_contentCreator];
 		SafeERC20.safeTransferFrom(cakeToken, msg.sender, address(this), _amount);
 		uint256 payout;

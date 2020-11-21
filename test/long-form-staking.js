@@ -43,7 +43,7 @@ describe("staking contract", function() {
 		assert.equal(creatorStake.toString(), aliceDeposit.toString(), "staking contract should have alice deposit")
 		assert.equal(aliceStake, aliceDeposit, "alice stake should equal deposit")
 		
-		await staking.reward(charlie.address, (aliceDeposit * 2).toString())
+		await staking.reward([charlie.address], [(aliceDeposit * 2).toString()])
 		const creatorStake2 = await staking.creatorStaked(charlie.address)
 
 		await approve(bob, bobDeposit.toString())

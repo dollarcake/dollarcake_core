@@ -24,20 +24,39 @@ describe("staking contract", function() {
 		assert.equal(timeLock.toString(), time.duration.days(30).toString())
 	})
 	it("should reward the contract properly", async function() {
-		const amountToSend = "1000000000000000000"
-		await token.approve(staking.address, amountToSend)
-		await staking.reward(alice.address, amountToSend)
+		const receivers = [alice.address, bob.address]
+		const amountToSend = ["1000000000000000000", "1000000000000000000"]
+		await token.approve(staking.address, "100000000000000000000")
+		await staking.reward(receivers, amountToSend)
+		
 		const balanceOfAlice = await token.balanceOf(alice.address)
+		const balanceOfBob = await token.balanceOf(bob.address)
 		const aliceStake = await staking.creatorStaked(alice.address)
+		const bobStake = await staking.creatorStaked(bob.address)
 		const balanceOfContract = await token.balanceOf(staking.address)
-		const calculatedAmount = Number(amountToSend) / 2 
+		const calculatedAmount = Number(amountToSend[0]) / 2 
 		
 		assert.equal(balanceOfAlice.toString(), calculatedAmount.toString(), "alice should have got half the payout")
-		assert.equal(balanceOfContract.toString(), calculatedAmount.toString(), "contract should have got half the payout")
 		assert.equal(aliceStake.toString(), calculatedAmount.toString(), "contract should have got half the payout")
+		assert.equal(balanceOfBob.toString(), calculatedAmount.toString(), "alice should have got half the payout")
+		assert.equal(bobStake.toString(), calculatedAmount.toString(), "contract should have got half the payout")
+		assert.equal(balanceOfContract.toString(), (calculatedAmount.toString() * 2), "contract should have got half the payout")
 
 	})
+	it("should fail to reward mismatch", async function() {
+		const receivers = [alice.address, bob.address, alice.address]
+		const amounts = ["10", "10"]
+		try {
+			await staking.reward(receivers, amounts)
+			should.fail("The call should have failed but didn't")
+		} catch(e) {
+			assert.equal(
+				e.message, 
+				"VM Exception while processing transaction: revert mismatch"
+			)
 
+		}
+	})
 	it("should reward the contract properly on 75/25 split", async function() {
 		await staking.turnOffGlobalSplit()
 		await staking.connect(alice).setSplit(25)
@@ -48,7 +67,7 @@ describe("staking contract", function() {
 
 		const amountToSend = "1000000000000000000"
 		await token.approve(staking.address, amountToSend)
-		await staking.reward(alice.address, amountToSend)
+		await staking.reward([alice.address], [amountToSend])
 		const balanceOfAlice = await token.balanceOf(alice.address)
 		const balanceOfContract = await token.balanceOf(staking.address)
 		const calculatedAmountAlice = Number(amountToSend) * 3 / 4
@@ -225,7 +244,7 @@ describe("staking contract", function() {
 		assert.equal(creatorStake.toString(), aliceDeposit.toString(), "staking contract should have alice deposit")
 		assert.equal(aliceStake, aliceDeposit, "alice stake should equal deposit")
 		
-		await staking.reward(charlie.address, (aliceDeposit * 2).toString())
+		await staking.reward([charlie.address], [(aliceDeposit * 2).toString()])
 		const creatorStake2 = await staking.creatorStaked(charlie.address)
 
 		await approve(bob, bobDeposit.toString())

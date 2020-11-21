@@ -43,10 +43,9 @@ npx hardhat run scripts/deploy-script.js
 [x] Factory 
 [x] Staking contract 
 [] Only minter for GSN and staking 
-[] Global Only Owner for staking - min inital and time lock (only gets written in on staking)
+[x] Global Only Owner for staking - min inital and time lock (only gets written in on staking)
 [] GSN network currently allows the relayer to make any tx for anyone
-[] GSN currently overflows last input field on contract
 [] Add event tests
-[] Add re entrancy guards 
-[] loop through reward and pool reward
-[] add pool reward 
+[x] Add re entrancy guards 
+[x] loop through reward and pool reward
+[x] add pool reward 
