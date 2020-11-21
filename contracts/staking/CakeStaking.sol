@@ -16,6 +16,7 @@ contract CakeStaking is Global, ReentrancyGuard, GasStation {
 	CakeToken public cakeToken;
 
 	mapping (address => mapping (address => uint256)) public userStake; // content creator to user 
+	// TODO decide if double mapping to allow non lock on multiple deposits
 	mapping (address => uint256) public minActionTime;
 	mapping (address => uint256) public stakerSplit;
 	mapping (address => uint256) public creatorStaked; // amount of funds stakes for content creator

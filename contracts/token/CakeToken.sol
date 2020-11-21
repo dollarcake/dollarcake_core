@@ -8,6 +8,6 @@ import "./ERC20.sol";
 
 contract CakeToken is ERC20 {
     constructor(address relayHub) public ERC20("Baking", "BAKE", relayHub) {
-        _mint(msg.sender, 10000000e18);
+        _mint(msg.sender, 10000000 ether);
     }
 }

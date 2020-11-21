@@ -33,7 +33,7 @@ describe("Forwarder contract", function() {
         assert.equal(balanceOfAlice.toString(), amountToTransfer, "bob should have one token")
     });
 
-    it.only("stake a token for user", async function() {
+    it("stake a token for user", async function() {
         const amountToTransfer = '100000000000000000000'
         await approve(owner, amountToTransfer)
         const request = await staking.connect(relayer).populateTransaction.deposit(bob.address, amountToTransfer);
