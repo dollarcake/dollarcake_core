@@ -6,6 +6,7 @@ import '@openzeppelin/contracts/access/Ownable.sol';
 
 
 contract Global is Ownable {
+	
 	uint256 public minInitialDeposit;
 	uint256 public globalStakerSplit;
 	uint256 public timeLock;
@@ -15,14 +16,15 @@ contract Global is Ownable {
 		isControlingSplit = true;
 		globalStakerSplit = 50;
 		minInitialDeposit = 10 ether; 
+		timeLock = 30 days;
 	}
 
-	function turnOffGlobal() external onlyOwner {
+	function turnOffGlobalSplit() external onlyOwner {
 		isControlingSplit = false;
 	}
 
 	function changeMinInitialDeposit(uint256 _minInitialDeposit) external onlyOwner {
-		minInitialDeposit = minInitialDeposit;
+		minInitialDeposit = _minInitialDeposit;
 	}
 
 	function changeGlobalStakeSplit(uint256 _globalStakerSplit) external onlyOwner {
@@ -31,6 +33,7 @@ contract Global is Ownable {
 	}
 
 	function changeTimeLock(uint256 _timeLock) external onlyOwner {
+		require(_timeLock >= 1 days, "not in bounds");
 		timeLock = _timeLock;
 	}
 

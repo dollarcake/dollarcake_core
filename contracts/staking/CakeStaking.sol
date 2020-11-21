@@ -14,7 +14,7 @@ contract CakeStaking is Global {
 	CakeToken public cakeToken;
 
 	mapping (address => mapping (address => uint256)) public userStake; // content creator to user 
-	mapping (address => uint256) public minWithdrawTime;
+	mapping (address => uint256) public minActionTime;
 	mapping (address => uint256) public stakerSplit;
 	mapping (address => uint256) public creatorStaked; // amount of funds stakes for content creator
 	mapping (address => uint256) public contentTotalPayout; // amount of payouts for users of a CC
@@ -23,13 +23,12 @@ contract CakeStaking is Global {
 	event SplitUpdated(address contentCreator, uint256 newStakerPortion);
 
 	modifier timePassed() {
-		require(now >= minWithdrawTime[msg.sender], "wait more time");
+		require(now >= minActionTime[msg.sender], "wait more time");
 		_;
 	}
 
     constructor(address _cakeToken) public {
 		cakeToken = CakeToken(_cakeToken); 
-		timeLock = 30 days;
     }
 
     function reward(address _contentCreator, uint256 _amount) public {
@@ -47,10 +46,15 @@ contract CakeStaking is Global {
 		emit Reward(_amount, stakerReward, contentCreatorReward);
     }
 
-    function setSplit(uint256 _newStakerPortion) public {
+	function rewardStakingPoolOnly() public {
+		
+	}
+
+    function setSplit(uint256 _newStakerPortion) public timePassed {
 		// TODO lock them for x amount of time
 		require(_newStakerPortion <= 90 && _newStakerPortion >= 10, "not in bounds");
 		stakerSplit[msg.sender] = _newStakerPortion;
+		minActionTime[msg.sender] = now.add(timeLock);
 		emit SplitUpdated(msg.sender, _newStakerPortion);
     }
 
@@ -68,7 +72,7 @@ contract CakeStaking is Global {
 		userStake[_contentCreator][msg.sender] = userStake[_contentCreator][msg.sender].add(payout);
 		contentTotalPayout[_contentCreator] = contentTotalPayout[_contentCreator].add(payout); 
 		creatorStaked[_contentCreator] = creatorStaked[_contentCreator].add(_amount);
-		minWithdrawTime[msg.sender] = now.add(timeLock);
+		minActionTime[msg.sender] = now.add(timeLock);
 
 		//TODO add event
         // payoutIn / payoutTot = tokenAddedInd / total token (after paying)

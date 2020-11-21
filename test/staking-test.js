@@ -39,7 +39,7 @@ describe("staking contract", function() {
 	})
 
 	it("should reward the contract properly on 75/25 split", async function() {
-		await staking.turnOffGlobal()
+		await staking.turnOffGlobalSplit()
 		await staking.connect(alice).setSplit(25)
 
 		const stakerPortion = await staking.stakerSplit(alice.address)
@@ -80,7 +80,31 @@ describe("staking contract", function() {
 			)
 		}
 	})
-	
+	it("should fail to split _newStakerPortion during time lock then be allowed after timelock", async function() {
+		await staking.turnOffGlobalSplit()
+		await staking.connect(alice).setSplit(25)
+		const stakerPortion = await staking.stakerSplit(alice.address)
+		assert.equal(stakerPortion, 25)
+
+		try {
+			await staking.connect(alice).setSplit(40)
+			should.fail("The call should have failed but didn't")
+		} catch(e) {
+			assert.equal(
+				e.message, 
+				"VM Exception while processing transaction: revert wait more time"
+			)
+		}
+
+		await increaseTime(ethers)
+
+		await staking.connect(alice).setSplit(40)
+		const stakerPortion2 = await staking.stakerSplit(alice.address)
+		assert.equal(stakerPortion2, 40)
+
+
+	})
+
 	it("should deposit and withdraw alice 75% bob 25%", async function() {
 		const aliceDeposit = 17.5 * 1e18
 		const bobDeposit = 12.5 * 1e18
@@ -174,7 +198,6 @@ describe("staking contract", function() {
 		
 		await staking.reward(charlie.address, (aliceDeposit * 2).toString())
 		const creatorStake2 = await staking.creatorStaked(charlie.address)
-		console.log(creatorStake2.toString())
 
 		await approve(bob, bobDeposit.toString())
 		await staking.connect(bob).deposit(charlie.address, bobDeposit.toString())
