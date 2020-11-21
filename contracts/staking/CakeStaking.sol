@@ -6,8 +6,9 @@ import "../token/CakeToken.sol";
 import "../control/Global.sol";
 import '@openzeppelin/contracts/token/ERC20/SafeERC20.sol';
 import '@openzeppelin/contracts/math/SafeMath.sol';
+import '@openzeppelin/contracts/utils/ReentrancyGuard.sol';
 
-contract CakeStaking is Global {
+contract CakeStaking is Global, ReentrancyGuard {
 
 	using SafeMath for uint256;
 
@@ -32,7 +33,7 @@ contract CakeStaking is Global {
 		cakeToken = CakeToken(_cakeToken); 
     }
 
-    function reward(address _contentCreator, uint256 _amount) public {
+    function reward(address _contentCreator, uint256 _amount) public nonReentrant {
 		uint256 _stakerSplit;
 		if (isControlingSplit) {
 			_stakerSplit = globalStakerSplit;
@@ -47,11 +48,11 @@ contract CakeStaking is Global {
 		emit Reward(_amount, stakerReward, contentCreatorReward);
     }
 
-	function rewardStakingPoolOnly() public {
+	function rewardStakingPoolOnly() public nonReentrant {
 		
 	}
 
-    function setSplit(uint256 _newStakerPortion) public timePassed {
+    function setSplit(uint256 _newStakerPortion) public timePassed nonReentrant {
 		// TODO lock them for x amount of time
 		require(_newStakerPortion <= 90 && _newStakerPortion >= 10, "not in bounds");
 		stakerSplit[msg.sender] = _newStakerPortion;
@@ -59,7 +60,7 @@ contract CakeStaking is Global {
 		emit SplitUpdated(msg.sender, _newStakerPortion);
     }
 
-    function deposit(address _contentCreator, uint256 _amount) public {
+    function deposit(address _contentCreator, uint256 _amount) public nonReentrant {
         // deposit cake token
 		uint256 contractBalance = creatorStaked[_contentCreator];
 		SafeERC20.safeTransferFrom(cakeToken, msg.sender, address(this), _amount);
@@ -78,7 +79,7 @@ contract CakeStaking is Global {
         // payoutIn / payoutTot = tokenAddedInd / total token (after paying)
     }
 
-    function withdraw(address _contentCreator, uint256 _userStake) public timePassed {
+    function withdraw(address _contentCreator, uint256 _userStake) public timePassed nonReentrant {
 		uint256 contractBalance = creatorStaked[_contentCreator];
 		uint256 payout = _userStake.mul(contractBalance).div(contentTotalPayout[_contentCreator]);
 		SafeERC20.safeTransfer(cakeToken, msg.sender, payout);

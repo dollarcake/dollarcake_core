@@ -45,7 +45,6 @@ describe("staking contract", function() {
 		
 		await staking.reward(charlie.address, (aliceDeposit * 2).toString())
 		const creatorStake2 = await staking.creatorStaked(charlie.address)
-		console.log(creatorStake2.toString())
 
 		await approve(bob, bobDeposit.toString())
 		await staking.connect(bob).deposit(charlie.address, bobDeposit.toString())
