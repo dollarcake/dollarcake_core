@@ -6,11 +6,12 @@
   "scripts": {
     "test": "hardhat test",
     "node": "hardhat node",
-    "ganache": "ganache-cli -d 'relax explain knee sing action spider amused high enrich predict comfort trip'",
+    "ganache": "ganache-cli -d 'relax explain knee sing action spider amused high enrich predict comfort trip', -l 12000000",
     "deploy": "hardhat run scripts/deploy-system-script.js",
     "compile": "hardhat compile",
     "solhint": "./node_modules/.bin/solhint -f table contracts/**/*.sol contracts/*.sol",
-    "fix": "./node_modules/.bin/prettier --write contracts/**/*.sol && ./node_modules/.bin/prettier --write contracts/*.sol"
+    "fix": "./node_modules/.bin/prettier --write contracts/**/*.sol && ./node_modules/.bin/prettier --write contracts/*.sol",
+    "coverage": "hardhat coverage --solcoverjs ./.solcover.js --temp artifacts --testfiles \"./test/**/*.ts\""
   },
   "author": "",
   "license": "ISC",
@@ -33,6 +34,7 @@
     "hardhat-gas-reporter": "^1.0.1",
     "prettier-plugin-solidity": "^1.0.0-alpha.60",
     "solhint": "^3.3.2",
-    "solhint-plugin-prettier": "^0.0.5"
+    "solhint-plugin-prettier": "^0.0.5",
+    "solidity-coverage": "^0.7.12"
   }
 }

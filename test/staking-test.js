@@ -43,6 +43,12 @@ describe("staking contract", function() {
 		assert.equal(balanceOfContract.toString(), (calculatedAmount.toString() * 2), "contract should have got half the payout")
 
 	})
+	it("should load test the reward function", async function() {
+		const receivers = Array(225).fill(alice.address)
+		const amountToSend = Array(225).fill("1000000000000000000")
+		await token.approve(staking.address, "1000000000000000000000000")
+		await staking.reward(receivers, amountToSend)
+	})
 	it("should fail to reward mismatch", async function() {
 		const receivers = [alice.address, bob.address, alice.address]
 		const amounts = ["10", "10"]

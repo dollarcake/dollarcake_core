@@ -7,3 +7,7 @@ artifacts
 .env
 
 abi
+
+coverage
+
+coverage.json
