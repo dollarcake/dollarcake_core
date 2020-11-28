@@ -58,10 +58,10 @@ npx hardhat run scripts/deploy-script.js
 
 [] token tests
 
-[] more long form testing
+[x] more long form testing
 
-[] fix timelock issue 
+[x] fix timelock issue 
 
 ## Deployed 
-* token contract address 0x250147E50698d2B43Ebd4d9e53ecB0dB50552745
-* cake contract address 0x076177A1910A60b2C42946172Fc3FC3Fd11465D9
+* token contract address 0xbEeDCEA0e936CE7b6962C1AAeaE45eE53C7E0dcc
+* cake contract address 0x5dD84e3824a2253E40C6Da4E4F345A73EfbBFd7c
