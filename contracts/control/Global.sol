@@ -33,7 +33,7 @@ contract Global is Ownable {
 	}
 
 	function changeTimeLock(uint256 _timeLock) external onlyOwner {
-		require(_timeLock >= 1 days, "not in bounds");
+		require(_timeLock >= 1 hours, "not in bounds");
 		timeLock = _timeLock;
 	}
 

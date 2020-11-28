@@ -283,18 +283,19 @@ describe("staking contract", function() {
 		await token.transfer(alice.address, aliceDeposit.toString())
 		await staking.connect(alice).deposit(dave.address, aliceDeposit.toString())
 
+		const withdrawPayout = await staking.withdrawPayout(charlie.address, aliceStake)
 		await staking.connect(alice).withdraw(charlie.address, aliceStake)
 		await staking.connect(bob).withdraw(charlie.address, bobStake)
 
 		const aliceStakeAfter = await staking.userStake(charlie.address, alice.address)
 		const balanceOfAliceAfter = await token.balanceOf(alice.address)
-
+		
 		const bobStakeAfter = await staking.userStake(charlie.address, bob.address)
 		const balanceOfBobAfter = await token.balanceOf(bob.address)
-
 		const calculatedAlicePayout = aliceDeposit * 2
 
 		assert.equal(aliceStakeAfter.toString(), "0", "alice should have no stake")
+		assert.equal(withdrawPayout.toString(), calculatedAlicePayout.toString(), "getter function should work properly")
 		assert.equal(balanceOfAliceAfter, calculatedAlicePayout, "alice should have original amount of tokens")
 
 		assert.equal(bobStakeAfter.toString(), "0", "bob should have no stake")

@@ -92,12 +92,15 @@ contract CakeStaking is Global, ReentrancyGuard, GasStation {
     }
 
     function withdraw(address _contentCreator, uint256 _userStake) public timePassed(_contentCreator) nonReentrant {
-		uint256 contractBalance = creatorStaked[_contentCreator];
-		uint256 payout = _userStake.mul(contractBalance).div(contentTotalPayout[_contentCreator]);
+		uint256 payout = withdrawPayout(_contentCreator, _userStake);
 		SafeERC20.safeTransfer(cakeToken, _msgSender(), payout);
 		userStake[_contentCreator][_msgSender()] = userStake[_contentCreator][_msgSender()].sub(_userStake);
 		creatorStaked[_contentCreator] = creatorStaked[_contentCreator].sub(payout);
 		contentTotalPayout[_contentCreator] = contentTotalPayout[_contentCreator].sub(_userStake);
 		emit UserWithdrawl(_msgSender(), _contentCreator, _userStake, payout);
     }
+
+	function withdrawPayout(address _contentCreator, uint256 _userStake) public view returns (uint256) {
+		return _userStake.mul(creatorStaked[_contentCreator]).div(contentTotalPayout[_contentCreator]);
+	}
 }
