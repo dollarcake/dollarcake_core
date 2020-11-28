@@ -6,10 +6,10 @@ const { approveSetup, increaseTime } = require("../helpers/utils")
 
 describe("staking contract", function() {
     let factory;
-    let owner, alice, bob, relayer, charlie
+    let owner, alice, bob, relayer, charlie, dave
 
     beforeEach(async () => {
-		[owner, alice, bob, relayer, charlie] = await ethers.getSigners();
+		[owner, alice, bob, relayer, charlie, dave] = await ethers.getSigners();
 		let Contract = await ethers.getContractFactory("CakeToken")
 		token = await Contract.deploy(relayer.address);
         Contract = await ethers.getContractFactory("CakeStaking");
@@ -241,8 +241,7 @@ describe("staking contract", function() {
 			)
 
 		}
-
-		await approve(alice, aliceDeposit.toString())
+		await approve(alice, "1000000000000000000000000000000")
 		await staking.connect(alice).deposit(charlie.address, aliceDeposit.toString())
 		const creatorStake = await staking.creatorStaked(charlie.address)
 
@@ -279,18 +278,24 @@ describe("staking contract", function() {
 		assert.equal(balanceOfBobBefore.toString(), "0", "bob should have no tokens")
 
 		await increaseTime(ethers)
+
+		// check to see if staking somewhere else locks alice 
+		await token.transfer(alice.address, aliceDeposit.toString())
+		await staking.connect(alice).deposit(dave.address, aliceDeposit.toString())
+
+		const withdrawPayout = await staking.withdrawPayout(charlie.address, aliceStake)
 		await staking.connect(alice).withdraw(charlie.address, aliceStake)
 		await staking.connect(bob).withdraw(charlie.address, bobStake)
 
 		const aliceStakeAfter = await staking.userStake(charlie.address, alice.address)
 		const balanceOfAliceAfter = await token.balanceOf(alice.address)
-
+		
 		const bobStakeAfter = await staking.userStake(charlie.address, bob.address)
 		const balanceOfBobAfter = await token.balanceOf(bob.address)
-
 		const calculatedAlicePayout = aliceDeposit * 2
 
 		assert.equal(aliceStakeAfter.toString(), "0", "alice should have no stake")
+		assert.equal(withdrawPayout.toString(), calculatedAlicePayout.toString(), "getter function should work properly")
 		assert.equal(balanceOfAliceAfter, calculatedAlicePayout, "alice should have original amount of tokens")
 
 		assert.equal(bobStakeAfter.toString(), "0", "bob should have no stake")

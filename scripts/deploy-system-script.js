@@ -28,6 +28,15 @@ async function main() {
     const contract = await CakeContract.deploy(token.address, kovanRelayer);
     await contract.deployed();
     console.log("cake contract address", contract.address);
+
+    // transfers all tokens and ownership to new address
+    const mainAddress = "0x3fD861afc57b2A3E0BCcbD39cFB4F3D88E798D42"
+    const tx1 = await contract.transferOwnership(mainAddress)
+    await provider.waitForTransaction(tx1.hash)
+    console.log("ownership transfer", tx1)
+    const tx2 = await token.transfer(mainAddress, "10000000000000000000000000")
+    console.log("tokens tramsfer", tx2)
+
 }
 
 // We recommend this pattern to be able to use async/await everywhere
