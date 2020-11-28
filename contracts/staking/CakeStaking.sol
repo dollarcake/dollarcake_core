@@ -16,8 +16,7 @@ contract CakeStaking is Global, ReentrancyGuard, GasStation {
 	CakeToken public cakeToken;
 
 	mapping (address => mapping (address => uint256)) public userStake; // content creator to user 
-	// TODO decide if double mapping to allow non lock on multiple deposits
-	mapping (address => uint256) public minActionTime;
+	mapping (address => mapping (address => uint256)) public minActionTime; // user to content creator to time
 	mapping (address => uint256) public stakerSplit;
 	mapping (address => uint256) public creatorStaked; // amount of funds stakes for content creator
 	mapping (address => uint256) public contentTotalPayout; // amount of payouts for users of a CC
@@ -27,8 +26,8 @@ contract CakeStaking is Global, ReentrancyGuard, GasStation {
 	event UserDeposit(address indexed user, address indexed contentCreator, uint256 amountDespoited, uint256 payout);
 	event UserWithdrawl(address indexed user, address indexed contentCreator, uint256 payout, uint256 amountRecieved);
 
-	modifier timePassed() {
-		require(now >= minActionTime[_msgSender()], "wait more time");
+	modifier timePassed(address _contentCreator) {
+		require(now >= minActionTime[_msgSender()][_contentCreator], "wait more time");
 		_;
 	}
 
@@ -67,10 +66,10 @@ contract CakeStaking is Global, ReentrancyGuard, GasStation {
 		}
 	}
 
-    function setSplit(uint256 _newStakerPortion) public timePassed nonReentrant {
+    function setSplit(uint256 _newStakerPortion) public timePassed(_msgSender()) nonReentrant {
 		require(_newStakerPortion <= 90 && _newStakerPortion >= 10, "not in bounds");
 		stakerSplit[_msgSender()] = _newStakerPortion;
-		minActionTime[_msgSender()] = now.add(timeLock);
+		minActionTime[_msgSender()][_msgSender()] = now.add(timeLock);
 		emit SplitUpdated(_msgSender(), _newStakerPortion);
     }
 
@@ -87,12 +86,12 @@ contract CakeStaking is Global, ReentrancyGuard, GasStation {
 		userStake[_contentCreator][_msgSender()] = userStake[_contentCreator][_msgSender()].add(payout);
 		contentTotalPayout[_contentCreator] = contentTotalPayout[_contentCreator].add(payout); 
 		creatorStaked[_contentCreator] = creatorStaked[_contentCreator].add(_amount);
-		minActionTime[_msgSender()] = now.add(timeLock);
+		minActionTime[_msgSender()][_contentCreator] = now.add(timeLock);
 		emit UserDeposit(_msgSender(), _contentCreator, _amount, payout);
         // payoutIn / payoutTot = tokenAddedInd / total token (after paying)
     }
 
-    function withdraw(address _contentCreator, uint256 _userStake) public timePassed nonReentrant {
+    function withdraw(address _contentCreator, uint256 _userStake) public timePassed(_contentCreator) nonReentrant {
 		uint256 contractBalance = creatorStaked[_contentCreator];
 		uint256 payout = _userStake.mul(contractBalance).div(contentTotalPayout[_contentCreator]);
 		SafeERC20.safeTransfer(cakeToken, _msgSender(), payout);
