@@ -9,7 +9,7 @@ describe("Forwarder contract", function() {
     beforeEach(async () => {
 		[owner, alice, bob, relayer, charlie] = await ethers.getSigners();
         let Contract = await ethers.getContractFactory("CakeStaking");
-        staking = await Contract.deploy(relayer.address, "cake", "cake");
+        staking = await Contract.deploy("cake", "cake");
 	});
     it("Check token balance", async function() {
         const balance = await staking.balanceOf(owner.address);

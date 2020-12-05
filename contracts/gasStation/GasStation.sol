@@ -4,23 +4,18 @@ pragma solidity ^0.6.0;
 import "hardhat/console.sol";
 
 contract GasStation {
-    constructor(address relayHub) public {
-        _relayHub = relayHub;
-    }
-
-    // Default RelayHub address, deployed on mainnet and all testnets at the same address
-    address private _relayHub;
-
     /**
      * @dev Replacement for msg.sender. Returns the actual sender of a transaction: msg.sender for regular transactions,
      * and the end-user for GSN relayed calls (where msg.sender is actually `RelayHub`).
      *
      * IMPORTANT: Contracts derived from {GSNRecipient} should never use `msg.sender`, and use {_msgSender} instead.
      */
-    function _msgSender() internal view virtual returns (address payable) {
-        if (msg.sender != _relayHub) {
+    function _msgSender(bytes memory _message, bytes memory _signature) internal view virtual returns (address payable) {
+        if (_signature.length == 0 && _message.length == 0) {
+            console.log("inside", msg.sender);
             return msg.sender;
-        } else {
+        } else {            
+            console.log("outside", _getRelayedCallSender());
             return _getRelayedCallSender();
         }
     }

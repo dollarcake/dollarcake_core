@@ -11,7 +11,7 @@ describe("staking contract", function() {
     beforeEach(async () => {
 		[owner, alice, bob, relayer, charlie, dave] = await ethers.getSigners();
         Contract = await ethers.getContractFactory("CakeStaking");
-        staking = await Contract.deploy(relayer.address, "cake", "cake");
+        staking = await Contract.deploy("cake", "cake");
 	});
 
 	it("properly sets information in constructor", async function() {
@@ -157,7 +157,7 @@ describe("staking contract", function() {
 		await staking.transfer(bob.address, bobDeposit.toString())
 
 		try {
-			await staking.deposit(charlie.address, 10)
+			await staking.deposit(charlie.address, 10, '0x', '0x')
 			should.fail("The call should have failed but didn't")
 		} catch(e) {
 			assert.equal(
@@ -167,19 +167,19 @@ describe("staking contract", function() {
 
 		}
 
-		await staking.connect(alice).deposit(charlie.address, aliceDeposit.toString())
+		await staking.connect(alice).deposit(charlie.address, aliceDeposit.toString(), '0x', '0x')
 
 		const aliceStake = await staking.userStake(charlie.address, alice.address)
 		assert.equal(aliceStake, aliceDeposit, "alice stake should equal deposit")
 
-		await staking.connect(bob).deposit(charlie.address, bobDeposit.toString())
+		await staking.connect(bob).deposit(charlie.address, bobDeposit.toString(), '0x', '0x')
 
 		const bobStake = await staking.userStake(charlie.address, bob.address)
 		
 		assert.equal(bobStake.toString(), bobDeposit.toString(), "bob stake should equal deposit")
 
 		try {
-			await staking.connect(alice).withdraw(charlie.address, 10)
+			await staking.connect(alice).withdraw(charlie.address, 10, '0x', '0x')
 			should.fail("The call should have failed but didn't")
 		} catch(e) {
 			assert.equal(
@@ -196,8 +196,8 @@ describe("staking contract", function() {
 		assert.equal(balanceOfBobBefore.toString(), "0", "bob should have no tokens")
 
 		await increaseTime(ethers)
-		await staking.connect(alice).withdraw(charlie.address, aliceStake)
-		await staking.connect(bob).withdraw(charlie.address, bobStake)
+		await staking.connect(alice).withdraw(charlie.address, aliceStake, '0x', '0x')
+		await staking.connect(bob).withdraw(charlie.address, bobStake, '0x', '0x')
 
 		const aliceStakeAfter = await staking.userStake(charlie.address, alice.address)
 		const balanceOfAliceAfter = await staking.balanceOf(alice.address)
@@ -219,7 +219,7 @@ describe("staking contract", function() {
 		await staking.transfer(bob.address, bobDeposit.toString())
 
 		try {
-			await staking.deposit(charlie.address, 10)
+			await staking.deposit(charlie.address, 10, '0x', '0x')
 			should.fail("The call should have failed but didn't")
 		} catch(e) {
 			assert.equal(
@@ -228,7 +228,7 @@ describe("staking contract", function() {
 			)
 
 		}
-		await staking.connect(alice).deposit(charlie.address, aliceDeposit.toString())
+		await staking.connect(alice).deposit(charlie.address, aliceDeposit.toString(), '0x', '0x')
 		const creatorStake = await staking.creatorStaked(charlie.address)
 
 		const aliceStake = await staking.userStake(charlie.address, alice.address)
@@ -238,7 +238,7 @@ describe("staking contract", function() {
 		await staking.reward([charlie.address], [(aliceDeposit * 2).toString()])
 		const creatorStake2 = await staking.creatorStaked(charlie.address)
 
-		await staking.connect(bob).deposit(charlie.address, bobDeposit.toString())
+		await staking.connect(bob).deposit(charlie.address, bobDeposit.toString(), '0x', '0x')
 
 		const bobStake = await staking.userStake(charlie.address, bob.address)
 		const calculatedBobDeposit = bobDeposit / 2
@@ -246,7 +246,7 @@ describe("staking contract", function() {
 		assert.equal(bobStake.toString(), calculatedBobDeposit.toString(), "bob stake should equal deposit")
 
 		try {
-			await staking.connect(alice).withdraw(charlie.address, 10)
+			await staking.connect(alice).withdraw(charlie.address, 10, '0x', '0x')
 			should.fail("The call should have failed but didn't")
 		} catch(e) {
 			assert.equal(
@@ -266,11 +266,11 @@ describe("staking contract", function() {
 
 		// check to see if staking somewhere else locks alice 
 		await staking.transfer(alice.address, aliceDeposit.toString())
-		await staking.connect(alice).deposit(dave.address, aliceDeposit.toString())
+		await staking.connect(alice).deposit(dave.address, aliceDeposit.toString(), '0x', '0x')
 
 		const withdrawPayout = await staking.withdrawPayout(charlie.address, aliceStake)
-		await staking.connect(alice).withdraw(charlie.address, aliceStake)
-		await staking.connect(bob).withdraw(charlie.address, bobStake)
+		await staking.connect(alice).withdraw(charlie.address, aliceStake, '0x', '0x')
+		await staking.connect(bob).withdraw(charlie.address, bobStake, '0x', '0x')
 
 		const aliceStakeAfter = await staking.userStake(charlie.address, alice.address)
 		const balanceOfAliceAfter = await staking.balanceOf(alice.address)
@@ -286,7 +286,4 @@ describe("staking contract", function() {
 		assert.equal(bobStakeAfter.toString(), "0", "bob should have no stake")
 		assert.equal(balanceOfBobAfter, bobDeposit, "alice should have original amount of tokens")
 	})
-
-	// TODO add more long form tests 
-
 })

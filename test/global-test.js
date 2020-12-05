@@ -12,7 +12,7 @@ describe("global contract", function() {
     beforeEach(async () => {
 		[owner, alice, bob, relayer, charlie] = await ethers.getSigners();
         Contract = await ethers.getContractFactory("CakeStaking");
-        staking = await Contract.deploy(relayer.address, "cake", "cake");
+        staking = await Contract.deploy("cake", "cake");
 	});
 	
 	it("should turn off global in control split", async function() {
