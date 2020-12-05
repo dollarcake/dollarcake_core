@@ -9,11 +9,10 @@ import '@openzeppelin/contracts/token/ERC20/SafeERC20.sol';
 import '@openzeppelin/contracts/math/SafeMath.sol';
 import '@openzeppelin/contracts/utils/ReentrancyGuard.sol';
 
-contract CakeStaking is Global, ReentrancyGuard, GasStation {
+contract CakeStaking is Global, ReentrancyGuard, GasStation, CakeToken {
 
 	using SafeMath for uint256;
 
-	CakeToken public cakeToken;
 
 	mapping (address => mapping (address => uint256)) public userStake; // content creator to user 
 	mapping (address => mapping (address => uint256)) public minActionTime; // user to content creator to time
@@ -31,8 +30,7 @@ contract CakeStaking is Global, ReentrancyGuard, GasStation {
 		_;
 	}
 
-    constructor(address _cakeToken, address _relayHub) public GasStation(_relayHub) {
-		cakeToken = CakeToken(_cakeToken); 
+    constructor(address _relayHub, string memory _name, string memory _symbol) public GasStation(_relayHub) CakeToken(_name, _symbol) {
     }
 
 	function _msgSender() internal view override(Context, GasStation) returns (address payable) {
@@ -51,8 +49,10 @@ contract CakeStaking is Global, ReentrancyGuard, GasStation {
 			uint256 stakerReward = _amount[i].mul(_stakerSplit).div(100);
 			uint256 contentCreatorReward = _amount[i].sub(stakerReward);
 			creatorStaked[_contentCreator[i]] = creatorStaked[_contentCreator[i]].add(stakerReward);
-			SafeERC20.safeTransferFrom(cakeToken, _msgSender(), address(this), stakerReward);
-			SafeERC20.safeTransferFrom(cakeToken, _msgSender(), _contentCreator[i], contentCreatorReward);
+			// SafeERC20.safeTransferFrom(cakeToken, _msgSender(), address(this), stakerReward);
+			_transfer(_msgSender(), address(this), stakerReward);
+			// SafeERC20.safeTransferFrom(cakeToken, _msgSender(), _contentCreator[i], contentCreatorReward);
+			_transfer(_msgSender(), _contentCreator[i], contentCreatorReward);
 			emit Reward(_amount[i], stakerReward, contentCreatorReward);
 		}
     }
@@ -61,7 +61,8 @@ contract CakeStaking is Global, ReentrancyGuard, GasStation {
 		require(_contentCreator.length == _amount.length, "mismatch");
 		for (uint256 i = 0; i < _contentCreator.length; i++) { 
 			creatorStaked[_contentCreator[i]] = creatorStaked[_contentCreator[i]].add(_amount[i]);
-			SafeERC20.safeTransferFrom(cakeToken, _msgSender(), address(this), _amount[i]);
+			_transfer(_msgSender(), address(this), _amount[i]);
+			// SafeERC20.safeTransferFrom(cakeToken, _msgSender(), address(this), _amount[i]);
 			emit Reward(_amount[i], _amount[i], 0);
 		}
 	}
@@ -75,7 +76,9 @@ contract CakeStaking is Global, ReentrancyGuard, GasStation {
 
     function deposit(address _contentCreator, uint256 _amount) public nonReentrant {
 		uint256 contractBalance = creatorStaked[_contentCreator];
-		SafeERC20.safeTransferFrom(cakeToken, _msgSender(), address(this), _amount);
+		// SafeERC20.safeTransferFrom(cakeToken, _msgSender(), address(this), _amount);
+		_transfer(_msgSender(), address(this), _amount);
+
 		uint256 payout;
 		if (contentTotalPayout[_contentCreator] == 0) {
 			require(_amount >= minInitialDeposit, "minimum first stake");
@@ -93,7 +96,8 @@ contract CakeStaking is Global, ReentrancyGuard, GasStation {
 
     function withdraw(address _contentCreator, uint256 _userStake) public timePassed(_contentCreator) nonReentrant {
 		uint256 payout = withdrawPayout(_contentCreator, _userStake);
-		SafeERC20.safeTransfer(cakeToken, _msgSender(), payout);
+		// SafeERC20.safeTransfer(cakeToken, _msgSender(), payout);
+		_transfer(address(this), _msgSender(), payout);
 		userStake[_contentCreator][_msgSender()] = userStake[_contentCreator][_msgSender()].sub(_userStake);
 		creatorStaked[_contentCreator] = creatorStaked[_contentCreator].sub(payout);
 		contentTotalPayout[_contentCreator] = contentTotalPayout[_contentCreator].sub(_userStake);

@@ -31,7 +31,7 @@ import "@openzeppelin/contracts/utils/Address.sol";
  * functions have been added to mitigate the well-known issues around setting
  * allowances. See {IERC20-approve}.
  */
-contract ERC20 is GasStation, IERC20 {
+contract ERC20 is IERC20 {
     using SafeMath for uint256;
     using Address for address;
 
@@ -56,9 +56,8 @@ contract ERC20 is GasStation, IERC20 {
      */
     constructor(
         string memory name,
-        string memory symbol,
-        address relayHub
-    ) public GasStation(relayHub) {
+        string memory symbol
+    ) public {
         _name = name;
         _symbol = symbol;
         _decimals = 18;
@@ -124,7 +123,7 @@ contract ERC20 is GasStation, IERC20 {
         override
         returns (bool)
     {
-        _transfer(_msgSender(), recipient, amount);
+        _transfer(msg.sender, recipient, amount);
         return true;
     }
 
@@ -154,7 +153,7 @@ contract ERC20 is GasStation, IERC20 {
         override
         returns (bool)
     {
-        _approve(_msgSender(), spender, amount);
+        _approve(msg.sender, spender, amount);
         return true;
     }
 
@@ -178,8 +177,8 @@ contract ERC20 is GasStation, IERC20 {
         _transfer(sender, recipient, amount);
         _approve(
             sender,
-            _msgSender(),
-            _allowances[sender][_msgSender()].sub(
+            msg.sender,
+            _allowances[sender][msg.sender].sub(
                 amount,
                 "ERC20: transfer amount exceeds allowance"
             )
@@ -205,9 +204,9 @@ contract ERC20 is GasStation, IERC20 {
         returns (bool)
     {
         _approve(
-            _msgSender(),
+            msg.sender,
             spender,
-            _allowances[_msgSender()][spender].add(addedValue)
+            _allowances[msg.sender][spender].add(addedValue)
         );
         return true;
     }
@@ -232,9 +231,9 @@ contract ERC20 is GasStation, IERC20 {
         returns (bool)
     {
         _approve(
-            _msgSender(),
+            msg.sender,
             spender,
-            _allowances[_msgSender()][spender].sub(
+            _allowances[msg.sender][spender].sub(
                 subtractedValue,
                 "ERC20: decreased allowance below zero"
             )

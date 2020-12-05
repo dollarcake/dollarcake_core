@@ -48,6 +48,8 @@ npx hardhat run scripts/deploy-script.js
 
 [] GSN network currently allows the relayer to make any tx for anyone
 
+[] XDAI bridge
+
 [] Add event tests
 
 [x] Add re entrancy guards
