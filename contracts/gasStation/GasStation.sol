@@ -16,7 +16,6 @@ contract GasStation {
      */
     function _msgSender(string memory _function) internal virtual returns (address payable) {
         uint256 dataLength = msg.data.length;
-        console.log("data length", dataLength);
         if (dataLength < 250) {
             console.log("inside", msg.sender);
             return msg.sender;
