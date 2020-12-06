@@ -26,7 +26,7 @@ contract CakeStaking is Global, ReentrancyGuard, GasStation, CakeToken {
 	event UserWithdrawl(address indexed user, address indexed contentCreator, uint256 payout, uint256 amountRecieved);
 
 	modifier timePassed(address _contentCreator) {
-		require(now >= minActionTime[_msgSender()][_contentCreator], "wait more time");
+		require(now >= minActionTime[msg.sender][_contentCreator], "wait more time");
 		_;
 	}
 
@@ -45,7 +45,7 @@ contract CakeStaking is Global, ReentrancyGuard, GasStation, CakeToken {
 			uint256 stakerReward = _amount[i].mul(_stakerSplit).div(100);
 			uint256 contentCreatorReward = _amount[i].sub(stakerReward);
 			creatorStaked[_contentCreator[i]] = creatorStaked[_contentCreator[i]].add(stakerReward);
-			// SafeERC20.safeTransferFrom(cakeToken, _msgSender(), address(this), stakerReward);
+			// SafeERC20.safeTransferFrom(cakeToken, msg.sender, address(this), stakerReward);
 			_transfer(msg.sender, address(this), stakerReward);
 			// SafeERC20.safeTransferFrom(cakeToken, msg.sender, _contentCreator[i], contentCreatorReward);
 			_transfer(msg.sender, _contentCreator[i], contentCreatorReward);
@@ -70,10 +70,10 @@ contract CakeStaking is Global, ReentrancyGuard, GasStation, CakeToken {
 		emit SplitUpdated(msg.sender, _newStakerPortion);
     }
 
-    function deposit(address _contentCreator, uint256 _amount, bytes memory _message, bytes memory _signature) public nonReentrant {
-		address payable sender = _msgSender(_message, _signature);
+    function deposit(address _contentCreator, uint256 _amount) public nonReentrant {
+		address payable sender = _msgSender("deposit");
 		uint256 contractBalance = creatorStaked[_contentCreator];
-		// SafeERC20.safeTransferFrom(cakeToken, _msgSender(), address(this), _amount);
+		// SafeERC20.safeTransferFrom(cakeToken, msg.sender, address(this), _amount);
 		_transfer(sender, address(this), _amount);
 
 		uint256 payout;
@@ -91,10 +91,10 @@ contract CakeStaking is Global, ReentrancyGuard, GasStation, CakeToken {
         // payoutIn / payoutTot = tokenAddedInd / total token (after paying)
     }
 
-    function withdraw(address _contentCreator, uint256 _userStake, bytes memory _message, bytes memory _signature) public timePassed(_contentCreator) nonReentrant {
-		address payable sender = _msgSender(_message, _signature);
+    function withdraw(address _contentCreator, uint256 _userStake) public timePassed(_contentCreator) nonReentrant {
+		address payable sender = _msgSender("withdraw");
 		uint256 payout = withdrawPayout(_contentCreator, _userStake);
-		// SafeERC20.safeTransfer(cakeToken, _msgSender(), payout);
+		// SafeERC20.safeTransfer(cakeToken, msg.sender, payout);
 		_transfer(address(this), sender, payout);
 		userStake[_contentCreator][sender] = userStake[_contentCreator][sender].sub(_userStake);
 		creatorStaked[_contentCreator] = creatorStaked[_contentCreator].sub(payout);

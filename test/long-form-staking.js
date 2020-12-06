@@ -24,7 +24,7 @@ describe("long form staking contract", function() {
 		await staking.transfer(dave.address, (daveDeposit).toString())
 
 		try {
-			await staking.deposit(charlie.address, 10, '0x', '0x')
+			await staking.deposit(charlie.address, 10)
 			should.fail("The call should have failed but didn't")
 		} catch(e) {
 			assert.equal(
@@ -34,8 +34,8 @@ describe("long form staking contract", function() {
 
 		}
 
-		await staking.connect(alice).deposit(charlie.address, aliceDeposit.toString(), '0x', '0x')
-		await staking.connect(alice).deposit(erin.address, aliceDeposit.toString(), '0x', '0x')
+		await staking.connect(alice).deposit(charlie.address, aliceDeposit.toString())
+		await staking.connect(alice).deposit(erin.address, aliceDeposit.toString())
 
 		const creatorStake = await staking.creatorStaked(charlie.address)
 		const creatorStakeErin = await staking.creatorStaked(erin.address)
@@ -50,12 +50,12 @@ describe("long form staking contract", function() {
 		
 		await staking.reward([charlie.address], [(aliceDeposit * 2).toString()])
 
-		await staking.connect(bob).deposit(charlie.address, bobDeposit.toString(), '0x', '0x')
-		await staking.connect(bob).deposit(erin.address, bobDeposit.toString(), '0x', '0x')
+		await staking.connect(bob).deposit(charlie.address, bobDeposit.toString())
+		await staking.connect(bob).deposit(erin.address, bobDeposit.toString())
 		await staking.reward([erin.address], [(aliceDeposit * 2).toString()])
 
 
-		await staking.connect(dave).deposit(erin.address, daveDeposit.toString(), '0x', '0x')
+		await staking.connect(dave).deposit(erin.address, daveDeposit.toString())
 		const bobStake = await staking.userStake(charlie.address, bob.address)
 		const bobStakeErin = await staking.userStake(erin.address, bob.address)
 
@@ -69,7 +69,7 @@ describe("long form staking contract", function() {
 		assert.equal(bobStakeErin.toString(), bobDeposit.toString(), "bob stake should equal deposit")
 
 		try {
-			await staking.connect(alice).withdraw(charlie.address, 10, '0x', '0x')
+			await staking.connect(alice).withdraw(charlie.address, 10)
 			should.fail("The call should have failed but didn't")
 		} catch(e) {
 			assert.equal(
@@ -88,9 +88,9 @@ describe("long form staking contract", function() {
 		assert.equal(balanceOfDaveBefore.toString(), "0", "dave should have no tokens")
 
 		await increaseTime(ethers)
-		await staking.connect(alice).withdraw(charlie.address, aliceStake, '0x', '0x')
-		await staking.connect(bob).withdraw(charlie.address, bobStake, '0x', '0x')
-		await staking.connect(dave).withdraw(erin.address, daveStakeErin, '0x', '0x')
+		await staking.connect(alice).withdraw(charlie.address, aliceStake)
+		await staking.connect(bob).withdraw(charlie.address, bobStake)
+		await staking.connect(dave).withdraw(erin.address, daveStakeErin)
 
 		const aliceStakeAfter = await staking.userStake(charlie.address, alice.address)
 		const balanceOfAliceAfter = await staking.balanceOf(alice.address)
