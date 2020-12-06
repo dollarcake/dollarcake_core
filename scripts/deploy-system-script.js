@@ -18,14 +18,9 @@ async function main() {
     let provider = ethers.getDefaultProvider(process.env.PROVIDER);
 	signer = new ethers.Wallet(process.env.PRIVATE_KEY, provider);
 	
-	// deploy token 
-	const TokenContract = await ethers.getContractFactory("CakeToken", signer);
-    const token = await TokenContract.deploy(kovanRelayer);
-	await token.deployed()
-	console.log("token contract address", token.address)
 
     const CakeContract = await ethers.getContractFactory("CakeStaking", signer);
-    const contract = await CakeContract.deploy(token.address, kovanRelayer);
+    const contract = await CakeContract.deploy("Cake", "Cake");
     await contract.deployed();
     console.log("cake contract address", contract.address);
 
@@ -34,7 +29,7 @@ async function main() {
     const tx1 = await contract.transferOwnership(mainAddress)
     await provider.waitForTransaction(tx1.hash)
     console.log("ownership transfer", tx1)
-    const tx2 = await token.transfer(mainAddress, "10000000000000000000000000")
+    const tx2 = await contract.transfer(mainAddress, "10000000000000000000000000")
     console.log("tokens tramsfer", tx2)
 
 }
