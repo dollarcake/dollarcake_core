@@ -25,11 +25,6 @@ contract CakeStaking is Global, ReentrancyGuard, GasStation, CakeToken {
 	event UserDeposit(address indexed user, address indexed contentCreator, uint256 amountDespoited, uint256 payout);
 	event UserWithdrawl(address indexed user, address indexed contentCreator, uint256 payout, uint256 amountRecieved);
 
-	modifier timePassed(address _contentCreator) {
-		require(now >= minActionTime[msg.sender][_contentCreator], "wait more time");
-		_;
-	}
-
     constructor(string memory _name, string memory _symbol) public GasStation() CakeToken(_name, _symbol) {
     }
 
@@ -65,9 +60,10 @@ contract CakeStaking is Global, ReentrancyGuard, GasStation, CakeToken {
 		}
 	}
 
-    function setSplit(uint256 _newStakerPortion) public timePassed(msg.sender) nonReentrant {
+    function setSplit(uint256 _newStakerPortion) public nonReentrant {
 		require(_newStakerPortion <= 90 && _newStakerPortion >= 10, "not in bounds");
 		address payable sender = _msgSender("setSplit");
+		require(now >= minActionTime[sender][sender], "wait more time");
 		stakerSplit[sender] = _newStakerPortion;
 		minActionTime[sender][sender] = now.add(timeLock);
 		emit SplitUpdated(sender, _newStakerPortion);
@@ -93,8 +89,9 @@ contract CakeStaking is Global, ReentrancyGuard, GasStation, CakeToken {
         // payoutIn / payoutTot = tokenAddedInd / total token (after paying)
     }
 
-    function withdraw(address _contentCreator, uint256 _userStake) public timePassed(_contentCreator) nonReentrant {
+    function withdraw(address _contentCreator, uint256 _userStake) public nonReentrant {
 		address payable sender = _msgSender("withdraw");
+		require(now >= minActionTime[sender][_contentCreator], "wait more time");
 		uint256 payout = withdrawPayout(_contentCreator, _userStake);
 		_transfer(address(this), sender, payout);
 		userStake[_contentCreator][sender] = userStake[_contentCreator][sender].sub(_userStake);

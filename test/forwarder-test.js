@@ -1,6 +1,7 @@
 const { expect, assert } = require("chai");
 const { ethers } = require("hardhat");
 const { returnForwardRequest } = require("../helpers/signing.js")
+const { increaseTime } = require("../helpers/utils")
 
 describe("Forwarder contract", function() {
     let staking;
@@ -78,6 +79,7 @@ describe("Forwarder contract", function() {
         const userStake = await staking.userStake(alice.address, owner.address)
         assert.equal(userStake.toString(), amountToTransfer, "owner should have staked")
 
+        await increaseTime(ethers)
 
         const withdrawRequest = await staking.connect(relayer).populateTransaction.withdraw(alice.address, amountToTransfer);
         const withdrawNonce = await staking.nonce(owner.address)
@@ -85,7 +87,6 @@ describe("Forwarder contract", function() {
         withdrawRequest.data = newWithdrawData
         await relayer.sendTransaction(withdrawRequest);
         const newUserStake = await staking.userStake(alice.address, owner.address)
-        console.log({userStake:newUserStake.toString()})
         assert.equal(newUserStake.toString(), "0", "owner should have withdrawn")
     });
     it("setSplit", async function() {
