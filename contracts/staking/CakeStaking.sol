@@ -30,8 +30,13 @@ contract CakeStaking is Global, ReentrancyGuard, GasStation, CakeToken {
 		_;
 	}
 
-    constructor(string memory _name, string memory _symbol) public CakeToken(_name, _symbol) {
+    constructor(string memory _name, string memory _symbol) public GasStation() CakeToken(_name, _symbol) {
     }
+
+	function _msgSender(string memory _function) internal override(GasStation) returns (address payable) {
+   		return super._msgSender(_function);
+	}
+
 
     function reward(address[] memory _contentCreator, uint256[] memory _amount) public nonReentrant {
 		require(_contentCreator.length == _amount.length, "mismatch");
