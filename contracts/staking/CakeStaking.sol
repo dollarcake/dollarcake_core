@@ -9,11 +9,10 @@ import '@openzeppelin/contracts/token/ERC20/SafeERC20.sol';
 import '@openzeppelin/contracts/math/SafeMath.sol';
 import '@openzeppelin/contracts/utils/ReentrancyGuard.sol';
 
-contract CakeStaking is Global, ReentrancyGuard, GasStation {
+contract CakeStaking is Global, ReentrancyGuard, GasStation, CakeToken {
 
 	using SafeMath for uint256;
 
-	CakeToken public cakeToken;
 
 	mapping (address => mapping (address => uint256)) public userStake; // content creator to user 
 	mapping (address => mapping (address => uint256)) public minActionTime; // user to content creator to time
@@ -26,18 +25,13 @@ contract CakeStaking is Global, ReentrancyGuard, GasStation {
 	event UserDeposit(address indexed user, address indexed contentCreator, uint256 amountDespoited, uint256 payout);
 	event UserWithdrawl(address indexed user, address indexed contentCreator, uint256 payout, uint256 amountRecieved);
 
-	modifier timePassed(address _contentCreator) {
-		require(now >= minActionTime[_msgSender()][_contentCreator], "wait more time");
-		_;
-	}
-
-    constructor(address _cakeToken, address _relayHub) public GasStation(_relayHub) {
-		cakeToken = CakeToken(_cakeToken); 
+    constructor(string memory _name, string memory _symbol) public GasStation() CakeToken(_name, _symbol) {
     }
 
-	function _msgSender() internal view override(Context, GasStation) returns (address payable) {
-   		return super._msgSender();
+	function _msgSender(string memory _function) internal override(GasStation) returns (address payable) {
+   		return super._msgSender(_function);
 	}
+
 
     function reward(address[] memory _contentCreator, uint256[] memory _amount) public nonReentrant {
 		require(_contentCreator.length == _amount.length, "mismatch");
@@ -51,8 +45,8 @@ contract CakeStaking is Global, ReentrancyGuard, GasStation {
 			uint256 stakerReward = _amount[i].mul(_stakerSplit).div(100);
 			uint256 contentCreatorReward = _amount[i].sub(stakerReward);
 			creatorStaked[_contentCreator[i]] = creatorStaked[_contentCreator[i]].add(stakerReward);
-			SafeERC20.safeTransferFrom(cakeToken, _msgSender(), address(this), stakerReward);
-			SafeERC20.safeTransferFrom(cakeToken, _msgSender(), _contentCreator[i], contentCreatorReward);
+			_transfer(msg.sender, address(this), stakerReward);
+			_transfer(msg.sender, _contentCreator[i], contentCreatorReward);
 			emit Reward(_amount[i], stakerReward, contentCreatorReward);
 		}
     }
@@ -61,21 +55,25 @@ contract CakeStaking is Global, ReentrancyGuard, GasStation {
 		require(_contentCreator.length == _amount.length, "mismatch");
 		for (uint256 i = 0; i < _contentCreator.length; i++) { 
 			creatorStaked[_contentCreator[i]] = creatorStaked[_contentCreator[i]].add(_amount[i]);
-			SafeERC20.safeTransferFrom(cakeToken, _msgSender(), address(this), _amount[i]);
+			_transfer(msg.sender, address(this), _amount[i]);
 			emit Reward(_amount[i], _amount[i], 0);
 		}
 	}
 
-    function setSplit(uint256 _newStakerPortion) public timePassed(_msgSender()) nonReentrant {
+    function setSplit(uint256 _newStakerPortion) public nonReentrant {
 		require(_newStakerPortion <= 90 && _newStakerPortion >= 10, "not in bounds");
-		stakerSplit[_msgSender()] = _newStakerPortion;
-		minActionTime[_msgSender()][_msgSender()] = now.add(timeLock);
-		emit SplitUpdated(_msgSender(), _newStakerPortion);
+		address payable sender = _msgSender("setSplit");
+		require(now >= minActionTime[sender][sender], "wait more time");
+		stakerSplit[sender] = _newStakerPortion;
+		minActionTime[sender][sender] = now.add(timeLock);
+		emit SplitUpdated(sender, _newStakerPortion);
     }
 
     function deposit(address _contentCreator, uint256 _amount) public nonReentrant {
+		address payable sender = _msgSender("deposit");
 		uint256 contractBalance = creatorStaked[_contentCreator];
-		SafeERC20.safeTransferFrom(cakeToken, _msgSender(), address(this), _amount);
+		_transfer(sender, address(this), _amount);
+
 		uint256 payout;
 		if (contentTotalPayout[_contentCreator] == 0) {
 			require(_amount >= minInitialDeposit, "minimum first stake");
@@ -83,21 +81,23 @@ contract CakeStaking is Global, ReentrancyGuard, GasStation {
 		} else {
 			payout = _amount.mul(contentTotalPayout[_contentCreator]).div(contractBalance);
 		}
-		userStake[_contentCreator][_msgSender()] = userStake[_contentCreator][_msgSender()].add(payout);
+		userStake[_contentCreator][sender] = userStake[_contentCreator][sender].add(payout);
 		contentTotalPayout[_contentCreator] = contentTotalPayout[_contentCreator].add(payout); 
 		creatorStaked[_contentCreator] = creatorStaked[_contentCreator].add(_amount);
-		minActionTime[_msgSender()][_contentCreator] = now.add(timeLock);
-		emit UserDeposit(_msgSender(), _contentCreator, _amount, payout);
+		minActionTime[sender][_contentCreator] = now.add(timeLock);
+		emit UserDeposit(sender, _contentCreator, _amount, payout);
         // payoutIn / payoutTot = tokenAddedInd / total token (after paying)
     }
 
-    function withdraw(address _contentCreator, uint256 _userStake) public timePassed(_contentCreator) nonReentrant {
+    function withdraw(address _contentCreator, uint256 _userStake) public nonReentrant {
+		address payable sender = _msgSender("withdraw");
+		require(now >= minActionTime[sender][_contentCreator], "wait more time");
 		uint256 payout = withdrawPayout(_contentCreator, _userStake);
-		SafeERC20.safeTransfer(cakeToken, _msgSender(), payout);
-		userStake[_contentCreator][_msgSender()] = userStake[_contentCreator][_msgSender()].sub(_userStake);
+		_transfer(address(this), sender, payout);
+		userStake[_contentCreator][sender] = userStake[_contentCreator][sender].sub(_userStake);
 		creatorStaked[_contentCreator] = creatorStaked[_contentCreator].sub(payout);
 		contentTotalPayout[_contentCreator] = contentTotalPayout[_contentCreator].sub(_userStake);
-		emit UserWithdrawl(_msgSender(), _contentCreator, _userStake, payout);
+		emit UserWithdrawl(sender, _contentCreator, _userStake, payout);
     }
 
 	function withdrawPayout(address _contentCreator, uint256 _userStake) public view returns (uint256) {

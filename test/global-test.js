@@ -2,7 +2,7 @@ const { assert } = require("chai");
 const { ethers } = require("hardhat");
 const { time } = require("@openzeppelin/test-helpers");
 const should = require("should");
-const { approveSetup, increaseTime } = require("../helpers/utils")
+const {increaseTime } = require("../helpers/utils")
 
 describe("global contract", function() {
     let factory;
@@ -11,11 +11,8 @@ describe("global contract", function() {
 
     beforeEach(async () => {
 		[owner, alice, bob, relayer, charlie] = await ethers.getSigners();
-		let Contract = await ethers.getContractFactory("CakeToken")
-		token = await Contract.deploy(relayer.address);
         Contract = await ethers.getContractFactory("CakeStaking");
-		staking = await Contract.deploy(token.address, relayer.address);
-		approve = approveSetup(token, staking)
+        staking = await Contract.deploy("cake", "cake");
 	});
 	
 	it("should turn off global in control split", async function() {

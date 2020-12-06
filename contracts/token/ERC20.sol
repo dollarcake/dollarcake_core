@@ -31,7 +31,7 @@ import "@openzeppelin/contracts/utils/Address.sol";
  * functions have been added to mitigate the well-known issues around setting
  * allowances. See {IERC20-approve}.
  */
-contract ERC20 is GasStation, IERC20 {
+contract ERC20 is IERC20, GasStation {
     using SafeMath for uint256;
     using Address for address;
 
@@ -56,9 +56,8 @@ contract ERC20 is GasStation, IERC20 {
      */
     constructor(
         string memory name,
-        string memory symbol,
-        address relayHub
-    ) public GasStation(relayHub) {
+        string memory symbol
+    ) public GasStation() {
         _name = name;
         _symbol = symbol;
         _decimals = 18;
@@ -124,7 +123,8 @@ contract ERC20 is GasStation, IERC20 {
         override
         returns (bool)
     {
-        _transfer(_msgSender(), recipient, amount);
+        address payable sender = _msgSender("transfer");
+        _transfer(sender, recipient, amount);
         return true;
     }
 
@@ -154,7 +154,8 @@ contract ERC20 is GasStation, IERC20 {
         override
         returns (bool)
     {
-        _approve(_msgSender(), spender, amount);
+         address payable sender = _msgSender("approve");
+        _approve(sender, spender, amount);
         return true;
     }
 
@@ -175,11 +176,12 @@ contract ERC20 is GasStation, IERC20 {
         address recipient,
         uint256 amount
     ) public virtual override returns (bool) {
+        address payable _sender = _msgSender("transferFrom");
         _transfer(sender, recipient, amount);
         _approve(
             sender,
-            _msgSender(),
-            _allowances[sender][_msgSender()].sub(
+            _sender,
+            _allowances[sender][_sender].sub(
                 amount,
                 "ERC20: transfer amount exceeds allowance"
             )
@@ -204,10 +206,11 @@ contract ERC20 is GasStation, IERC20 {
         virtual
         returns (bool)
     {
+        address payable sender = _msgSender("increaseAllowance");
         _approve(
-            _msgSender(),
+            sender,
             spender,
-            _allowances[_msgSender()][spender].add(addedValue)
+            _allowances[sender][spender].add(addedValue)
         );
         return true;
     }
@@ -231,10 +234,11 @@ contract ERC20 is GasStation, IERC20 {
         virtual
         returns (bool)
     {
+        address payable sender = _msgSender("decreaseAllowance");
         _approve(
-            _msgSender(),
+            sender,
             spender,
-            _allowances[_msgSender()][spender].sub(
+            _allowances[sender][spender].sub(
                 subtractedValue,
                 "ERC20: decreased allowance below zero"
             )

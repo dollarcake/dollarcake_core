@@ -7,7 +7,7 @@ import "../gasStation/GasStation.sol";
 import "./ERC20.sol";
 
 contract CakeToken is ERC20 {
-    constructor(address relayHub) public ERC20("Baking", "BAKE", relayHub) {
+    constructor(string memory _name, string memory _symbol) public ERC20(_name, _symbol) {
         _mint(msg.sender, 10000000 ether);
     }
 }

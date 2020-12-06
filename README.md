@@ -46,7 +46,14 @@ npx hardhat run scripts/deploy-script.js
 
 [x] Global Only Owner for staking - min inital and time lock (only gets written in on staking)
 
-[] GSN network currently allows the relayer to make any tx for anyone
+[x] GSN network currently allows the relayer to make any tx for anyone
+
+[x] GSN network positive tests
+
+[] GSN network negative tests
+
+
+[] XDAI bridge
 
 [] Add event tests
 
@@ -63,5 +70,4 @@ npx hardhat run scripts/deploy-script.js
 [x] fix timelock issue 
 
 ## Deployed 
-* token contract address 0xbEeDCEA0e936CE7b6962C1AAeaE45eE53C7E0dcc
-* cake contract address 0x5dD84e3824a2253E40C6Da4E4F345A73EfbBFd7c
+* cake contract address 0x48186f5038502e6b9c934Ca4bF36f07dF9E00E16

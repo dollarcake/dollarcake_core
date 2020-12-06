@@ -2,30 +2,26 @@ const { assert } = require("chai");
 const { ethers } = require("hardhat");
 const { time } = require("@openzeppelin/test-helpers");
 const should = require("should");
-const { approveSetup, increaseTime } = require("../helpers/utils")
+const { increaseTime } = require("../helpers/utils")
 
-describe("staking contract", function() {
+describe("long form staking contract", function() {
     let factory;
     let owner, alice, bob, relayer, charlie, dave, erin
 
     beforeEach(async () => {
 		[owner, alice, bob, relayer, charlie, dave, erin] = await ethers.getSigners();
-		let Contract = await ethers.getContractFactory("CakeToken")
-		token = await Contract.deploy(relayer.address);
         Contract = await ethers.getContractFactory("CakeStaking");
-		staking = await Contract.deploy(token.address, relayer.address);
-		approve = approveSetup(token, staking)
+        staking = await Contract.deploy("cake", "cake");
 	});
 	it("should deposit and withdraw alice bob dave while extra tokens added before bob and charlies deposits to multiple creators", async function() {
 		// roles, stakers, alice bob dave, CC charlie, erin
 		const aliceDeposit = 20 * 1e18
 		const bobDeposit = 10 * 1e18
 		const daveDeposit = 10 * 1e18 
-		await approve(owner, "10000000000000000000000000000")
 
-		await token.transfer(alice.address, (aliceDeposit * 2).toString())
-		await token.transfer(bob.address, (bobDeposit * 2 ).toString())
-		await token.transfer(dave.address, (daveDeposit).toString())
+		await staking.transfer(alice.address, (aliceDeposit * 2).toString())
+		await staking.transfer(bob.address, (bobDeposit * 2 ).toString())
+		await staking.transfer(dave.address, (daveDeposit).toString())
 
 		try {
 			await staking.deposit(charlie.address, 10)
@@ -38,7 +34,6 @@ describe("staking contract", function() {
 
 		}
 
-		await approve(alice, (aliceDeposit * 2).toString())
 		await staking.connect(alice).deposit(charlie.address, aliceDeposit.toString())
 		await staking.connect(alice).deposit(erin.address, aliceDeposit.toString())
 
@@ -55,13 +50,11 @@ describe("staking contract", function() {
 		
 		await staking.reward([charlie.address], [(aliceDeposit * 2).toString()])
 
-		await approve(bob, (bobDeposit * 2).toString())
 		await staking.connect(bob).deposit(charlie.address, bobDeposit.toString())
 		await staking.connect(bob).deposit(erin.address, bobDeposit.toString())
 		await staking.reward([erin.address], [(aliceDeposit * 2).toString()])
 
 
-		await approve(dave, (bobDeposit * 2).toString())
 		await staking.connect(dave).deposit(erin.address, daveDeposit.toString())
 		const bobStake = await staking.userStake(charlie.address, bob.address)
 		const bobStakeErin = await staking.userStake(erin.address, bob.address)
@@ -86,9 +79,9 @@ describe("staking contract", function() {
 
 		}
 
-		const balanceOfAliceBefore = await token.balanceOf(alice.address)
-		const balanceOfBobBefore = await token.balanceOf(bob.address)
-		const balanceOfDaveBefore = await token.balanceOf(dave.address)
+		const balanceOfAliceBefore = await staking.balanceOf(alice.address)
+		const balanceOfBobBefore = await staking.balanceOf(bob.address)
+		const balanceOfDaveBefore = await staking.balanceOf(dave.address)
 
 		assert.equal(balanceOfAliceBefore.toString(), "0", "alice should have no tokens")
 		assert.equal(balanceOfBobBefore.toString(), "0", "bob should have no tokens")
@@ -100,13 +93,13 @@ describe("staking contract", function() {
 		await staking.connect(dave).withdraw(erin.address, daveStakeErin)
 
 		const aliceStakeAfter = await staking.userStake(charlie.address, alice.address)
-		const balanceOfAliceAfter = await token.balanceOf(alice.address)
+		const balanceOfAliceAfter = await staking.balanceOf(alice.address)
 
 		const bobStakeAfter = await staking.userStake(charlie.address, bob.address)
-		const balanceOfBobAfter = await token.balanceOf(bob.address)
+		const balanceOfBobAfter = await staking.balanceOf(bob.address)
 
 		const daveStakeAfter = await staking.userStake(erin.address, dave.address)
-		const balanceOfDaveAfter = await token.balanceOf(dave.address)
+		const balanceOfDaveAfter = await staking.balanceOf(dave.address)
 
 
 		const calculatedAlicePayout = aliceDeposit * 2

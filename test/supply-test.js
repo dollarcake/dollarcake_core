@@ -9,7 +9,7 @@ describe("Cake token", function() {
     beforeEach(async () => {
         [owner, alice, bob] = await ethers.getSigners();
         let Contract = await ethers.getContractFactory("CakeToken");
-        token = await Contract.deploy(bob.address);
+        token = await Contract.deploy("cake", "cake");
     });
     
     it("Check supply is 10 million", async function() {
