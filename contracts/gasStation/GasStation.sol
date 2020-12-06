@@ -14,8 +14,6 @@ contract GasStation {
      *
      * IMPORTANT: Contracts derived from {GSNRecipient} should never use `msg.sender`, and use {_msgSender} instead.
      */
-    bytes public message1;
-    bytes public signature1;
     function _msgSender(string memory _function) internal virtual returns (address payable) {
         uint256 dataLength = msg.data.length;
         
@@ -23,12 +21,9 @@ contract GasStation {
             console.log("inside", msg.sender);
             return msg.sender;
         } else {
-            message1 = slice(msg.data, 68, 160);
-            signature1 = slice(msg.data, 228, 65);
-            console.log("length",msg.data.length);
-            // uint256 start = dataLength.sub(258);
-            bytes memory message = slice(msg.data, 68, 160);
-            bytes memory signature = slice(msg.data, 228, 65);
+            uint256 functionCall = dataLength.sub(225);
+            bytes memory message = slice(msg.data, functionCall, 160);
+            bytes memory signature = slice(msg.data, functionCall.add(160), 65);
             return _getRelayedCallSender(message, signature, _function);
         }
     }
@@ -47,13 +42,8 @@ contract GasStation {
     }
 
     function _validateMessage(bytes memory _message, uint256 _nonce, string memory _function) private {
-        console.log("validate");
-        // bytes memory bts1 = bytes("0x");
-        // var cct = _message.concat(bts1);
         (address cake, uint256 userNonce, string memory userFunction) = abi.decode(_message, (address, uint256, string));
-        console.log("decode");
         require(cake == address(this), "address");
-        console.log("currentNonce", userNonce, _nonce);
         require(userNonce == _nonce, "replay");
         require(
             keccak256(abi.encodePacked(_function)) == keccak256(abi.encodePacked(userFunction)),

@@ -18,44 +18,28 @@ describe("Forwarder contract", function() {
         expect(formatted).to.equal("10000000.0");
     });
 
-    it.only("Send token from relayer function", async function() {
+    it("Send token from relayer function", async function() {
         const amountToTransfer = '1'
         const request = await staking.connect(relayer).populateTransaction.transfer(alice.address, amountToTransfer);
+        
         const coder = new ethers.utils.AbiCoder( )
         let message = coder.encode(
             ["address", "uint256", "string"], 
             [staking.address, 0, "transfer"]
           );
-            const messageHash = ethers.utils.keccak256(message);
-            const messageHashBytes = ethers.utils.arrayify(messageHash);
-            let signedMessage = await owner.signMessage(messageHashBytes);
-            message = message.slice(2)
-            signedMessage = signedMessage.slice(2)
-            console.log({address: owner.address})
-        console.log("message", ethers.utils.arrayify(`0x${message}`).length)
-        console.log("signature", ethers.utils.arrayify(`0x${signedMessage}`).length)
+            
+        const messageHash = ethers.utils.keccak256(message);
+        const messageHashBytes = ethers.utils.arrayify(messageHash);
+        let signedMessage = await owner.signMessage(messageHashBytes);
+        message = message.slice(2)
+        signedMessage = signedMessage.slice(2)
         
 
         const data = request.data
         request.data = data + message + signedMessage;
-        const array = ethers.utils.arrayify(request.data)
-        console.log("data", array, array.length)
-        const total = request.data.length
-        console.log(request.data, request.data.length)
-        console.log({request})
-        console.log("sending")
-        const balanceOfAliceBefore = await staking.balanceOf(owner.address)
-        console.log({balanceOfAliceBefore: balanceOfAliceBefore.toString()})
 
-        const tx = await relayer.sendTransaction(request);
-        // console.log(tx)
+        await relayer.sendTransaction(request);
         const balanceOfAlice = await staking.balanceOf(alice.address)
-        const message1 = await staking.message1()
-        const signature1 = await staking.signature1()
-
-        console.log({message1, length: message1.length})
-        console.log({signature1, length: signature1.length})
-
         assert.equal(balanceOfAlice.toString(), amountToTransfer, "alice should have one token")
     });
 
