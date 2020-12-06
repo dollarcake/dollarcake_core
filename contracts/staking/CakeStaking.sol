@@ -70,9 +70,10 @@ contract CakeStaking is Global, ReentrancyGuard, GasStation, CakeToken {
 
     function setSplit(uint256 _newStakerPortion) public timePassed(msg.sender) nonReentrant {
 		require(_newStakerPortion <= 90 && _newStakerPortion >= 10, "not in bounds");
-		stakerSplit[msg.sender] = _newStakerPortion;
-		minActionTime[msg.sender][msg.sender] = now.add(timeLock);
-		emit SplitUpdated(msg.sender, _newStakerPortion);
+		address payable sender = _msgSender("setSplit");
+		stakerSplit[sender] = _newStakerPortion;
+		minActionTime[sender][sender] = now.add(timeLock);
+		emit SplitUpdated(sender, _newStakerPortion);
     }
 
     function deposit(address _contentCreator, uint256 _amount) public nonReentrant {

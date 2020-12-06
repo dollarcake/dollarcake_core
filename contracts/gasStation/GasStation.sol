@@ -16,7 +16,7 @@ contract GasStation {
      */
     function _msgSender(string memory _function) internal virtual returns (address payable) {
         uint256 dataLength = msg.data.length;
-        
+        console.log("data length", dataLength);
         if (dataLength < 250) {
             console.log("inside", msg.sender);
             return msg.sender;
@@ -29,7 +29,7 @@ contract GasStation {
     }
 
     function _getRelayedCallSender(bytes memory _message, bytes memory _signature, string memory _function)
-        private
+        internal
         returns (address payable)
     {
         bytes32 hash = keccak256(abi.encodePacked("\x19Ethereum Signed Message:\n32", keccak256(_message)));
@@ -41,7 +41,7 @@ contract GasStation {
         return payable(returnedAddress);
     }
 
-    function _validateMessage(bytes memory _message, uint256 _nonce, string memory _function) private {
+    function _validateMessage(bytes memory _message, uint256 _nonce, string memory _function) internal {
         (address cake, uint256 userNonce, string memory userFunction) = abi.decode(_message, (address, uint256, string));
         require(cake == address(this), "address");
         require(userNonce == _nonce, "replay");

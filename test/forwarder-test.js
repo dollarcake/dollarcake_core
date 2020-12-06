@@ -1,6 +1,6 @@
 const { expect, assert } = require("chai");
 const { ethers } = require("hardhat");
-const { approveSetup, increaseTime } = require("../helpers/utils")
+const { returnForwardRequest } = require("../helpers/signing.js")
 
 describe("Forwarder contract", function() {
     let staking;
@@ -18,26 +18,12 @@ describe("Forwarder contract", function() {
         expect(formatted).to.equal("10000000.0");
     });
 
-    it("Send token from relayer function", async function() {
+    it.only("Send token from relayer function", async function() {
         const amountToTransfer = '1'
         const request = await staking.connect(relayer).populateTransaction.transfer(alice.address, amountToTransfer);
-        
-        const coder = new ethers.utils.AbiCoder( )
-        let message = coder.encode(
-            ["address", "uint256", "string"], 
-            [staking.address, 0, "transfer"]
-          );
-            
-        const messageHash = ethers.utils.keccak256(message);
-        const messageHashBytes = ethers.utils.arrayify(messageHash);
-        let signedMessage = await owner.signMessage(messageHashBytes);
-        message = message.slice(2)
-        signedMessage = signedMessage.slice(2)
-        
-
-        const data = request.data
-        request.data = data + message + signedMessage;
-
+        const nonce = await staking.nonce(owner.address)
+        const newData = await returnForwardRequest(ethers, owner, staking, "transfer", nonce, request)   
+        request.data = newData
         await relayer.sendTransaction(request);
         const balanceOfAlice = await staking.balanceOf(alice.address)
         assert.equal(balanceOfAlice.toString(), amountToTransfer, "alice should have one token")

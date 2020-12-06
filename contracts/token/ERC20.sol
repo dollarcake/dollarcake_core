@@ -123,7 +123,6 @@ contract ERC20 is IERC20, GasStation {
         override
         returns (bool)
     {
-        console.log("first length",msg.data.length);
         address payable sender = _msgSender("transfer");
         _transfer(sender, recipient, amount);
         return true;
