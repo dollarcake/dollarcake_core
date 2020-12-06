@@ -50,9 +50,7 @@ contract CakeStaking is Global, ReentrancyGuard, GasStation, CakeToken {
 			uint256 stakerReward = _amount[i].mul(_stakerSplit).div(100);
 			uint256 contentCreatorReward = _amount[i].sub(stakerReward);
 			creatorStaked[_contentCreator[i]] = creatorStaked[_contentCreator[i]].add(stakerReward);
-			// SafeERC20.safeTransferFrom(cakeToken, msg.sender, address(this), stakerReward);
 			_transfer(msg.sender, address(this), stakerReward);
-			// SafeERC20.safeTransferFrom(cakeToken, msg.sender, _contentCreator[i], contentCreatorReward);
 			_transfer(msg.sender, _contentCreator[i], contentCreatorReward);
 			emit Reward(_amount[i], stakerReward, contentCreatorReward);
 		}
@@ -63,7 +61,6 @@ contract CakeStaking is Global, ReentrancyGuard, GasStation, CakeToken {
 		for (uint256 i = 0; i < _contentCreator.length; i++) { 
 			creatorStaked[_contentCreator[i]] = creatorStaked[_contentCreator[i]].add(_amount[i]);
 			_transfer(msg.sender, address(this), _amount[i]);
-			// SafeERC20.safeTransferFrom(cakeToken, msg.sender, address(this), _amount[i]);
 			emit Reward(_amount[i], _amount[i], 0);
 		}
 	}
@@ -79,7 +76,6 @@ contract CakeStaking is Global, ReentrancyGuard, GasStation, CakeToken {
     function deposit(address _contentCreator, uint256 _amount) public nonReentrant {
 		address payable sender = _msgSender("deposit");
 		uint256 contractBalance = creatorStaked[_contentCreator];
-		// SafeERC20.safeTransferFrom(cakeToken, msg.sender, address(this), _amount);
 		_transfer(sender, address(this), _amount);
 
 		uint256 payout;
@@ -100,7 +96,6 @@ contract CakeStaking is Global, ReentrancyGuard, GasStation, CakeToken {
     function withdraw(address _contentCreator, uint256 _userStake) public timePassed(_contentCreator) nonReentrant {
 		address payable sender = _msgSender("withdraw");
 		uint256 payout = withdrawPayout(_contentCreator, _userStake);
-		// SafeERC20.safeTransfer(cakeToken, msg.sender, payout);
 		_transfer(address(this), sender, payout);
 		userStake[_contentCreator][sender] = userStake[_contentCreator][sender].sub(_userStake);
 		creatorStaked[_contentCreator] = creatorStaked[_contentCreator].sub(payout);
