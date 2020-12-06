@@ -28,9 +28,28 @@ describe("Forwarder contract", function() {
         const balanceOfAlice = await staking.balanceOf(alice.address)
         assert.equal(balanceOfAlice.toString(), amountToTransfer, "alice should have one token")
     });
-    it.only("increaseAllowance", async function() {})
-    it.only("decreseAllowance", async function() {})
-    it.only("approve and transferFrom", async function() {
+    it("increase and decrease allowance", async function() {
+        const amountToTransfer = '100000000000000000000'
+        const request = await staking.connect(relayer).populateTransaction.increaseAllowance(alice.address, amountToTransfer);
+        const nonce = await staking.nonce(owner.address)
+        const newData = await returnForwardRequest(ethers, owner, staking, "increaseAllowance", nonce, request)   
+        request.data = newData
+        await relayer.sendTransaction(request);
+        const allowanceOfAlice = await staking.allowance(owner.address, alice.address)
+        assert.equal(allowanceOfAlice.toString(), amountToTransfer, "alice should have proper allowance")
+
+
+        const decreaseRequest = await staking.connect(relayer).populateTransaction.decreaseAllowance(alice.address, amountToTransfer);
+        const decreaseNonce = await staking.nonce(owner.address)
+        const decreaseNewData = await returnForwardRequest(ethers, owner, staking, "decreaseAllowance", decreaseNonce, decreaseRequest)   
+        decreaseRequest.data = decreaseNewData
+        await relayer.sendTransaction(decreaseRequest);
+        const allowanceOfAliceAfter = await staking.allowance(owner.address, alice.address)
+        assert.equal(allowanceOfAliceAfter.toString(), "0", "alice should have proper allowance")
+
+        
+    })
+    it("approve and transferFrom", async function() {
         const amountToTransfer = '100000000000000000000'
         const request = await staking.connect(relayer).populateTransaction.approve(alice.address, amountToTransfer);
         const nonce = await staking.nonce(owner.address)
@@ -57,7 +76,6 @@ describe("Forwarder contract", function() {
         request.data = newData
         await relayer.sendTransaction(request);
         const userStake = await staking.userStake(alice.address, owner.address)
-        console.log({userStake:userStake.toString()})
         assert.equal(userStake.toString(), amountToTransfer, "owner should have staked")
 
 
@@ -70,6 +88,14 @@ describe("Forwarder contract", function() {
         console.log({userStake:newUserStake.toString()})
         assert.equal(newUserStake.toString(), "0", "owner should have withdrawn")
     });
-    it.only("setSplit", async function() {})
+    it("setSplit", async function() {
+        const request = await staking.connect(relayer).populateTransaction.setSplit(45);
+        const nonce = await staking.nonce(owner.address)
+        const newData = await returnForwardRequest(ethers, owner, staking, "setSplit", nonce, request)   
+        request.data = newData
+        await relayer.sendTransaction(request);
+        const stakerSplit = await staking.stakerSplit(owner.address)
+        assert.equal(stakerSplit.toString(), "45", "new split should be set")
+    })
 
 });
