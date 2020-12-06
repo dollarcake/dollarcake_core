@@ -28,10 +28,26 @@ describe("Forwarder contract", function() {
         const balanceOfAlice = await staking.balanceOf(alice.address)
         assert.equal(balanceOfAlice.toString(), amountToTransfer, "alice should have one token")
     });
-    it("approve", async function() {})
-    it("increaseAllowance", async function() {})
-    it("decreseAllowance", async function() {})
-    it("transferFrom", async function() {})
+    it.only("increaseAllowance", async function() {})
+    it.only("decreseAllowance", async function() {})
+    it.only("approve and transferFrom", async function() {
+        const amountToTransfer = '100000000000000000000'
+        const request = await staking.connect(relayer).populateTransaction.approve(alice.address, amountToTransfer);
+        const nonce = await staking.nonce(owner.address)
+        const newData = await returnForwardRequest(ethers, owner, staking, "approve", nonce, request)   
+        request.data = newData
+        await relayer.sendTransaction(request);
+        const allowanceOfAlice = await staking.allowance(owner.address, alice.address)
+        assert.equal(allowanceOfAlice.toString(), amountToTransfer, "alice should have proper allowance")
+
+        const transferFromRequest = await staking.connect(relayer).populateTransaction.transferFrom(owner.address, alice.address, amountToTransfer);
+        const transferFromNonce = await staking.nonce(alice.address)
+        const transferFromNewData = await returnForwardRequest(ethers, alice, staking, "transferFrom", transferFromNonce, transferFromRequest)   
+        transferFromRequest.data = transferFromNewData
+        await relayer.sendTransaction(transferFromRequest);
+        const balanceOfAlice = await staking.balanceOf(alice.address)
+        assert.equal(balanceOfAlice.toString(), amountToTransfer, "alice should have proper balance")
+    })
 
     it("should deposit then withdraw relayer", async function() {
         const amountToTransfer = '100000000000000000000'
@@ -54,6 +70,6 @@ describe("Forwarder contract", function() {
         console.log({userStake:newUserStake.toString()})
         assert.equal(newUserStake.toString(), "0", "owner should have withdrawn")
     });
-    it("setSplit", async function() {})
+    it.only("setSplit", async function() {})
 
 });

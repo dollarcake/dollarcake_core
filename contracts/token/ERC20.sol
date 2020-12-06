@@ -181,7 +181,7 @@ contract ERC20 is IERC20, GasStation {
         _approve(
             sender,
             _sender,
-            _allowances[sender][sender].sub(
+            _allowances[sender][_sender].sub(
                 amount,
                 "ERC20: transfer amount exceeds allowance"
             )
