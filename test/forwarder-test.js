@@ -28,6 +28,28 @@ describe("Forwarder contract", function() {
         const balanceOfAlice = await staking.balanceOf(alice.address)
         assert.equal(balanceOfAlice.toString(), amountToTransfer, "alice should have one token")
     });
+    it.only("should deposit then withdraw relayer", async function() {
+        const amountToTransfer = '100000000000000000000'
+        const request = await staking.connect(relayer).populateTransaction.deposit(alice.address, amountToTransfer);
+        const nonce = await staking.nonce(owner.address)
+        const newData = await returnForwardRequest(ethers, owner, staking, "deposit", nonce, request)   
+        request.data = newData
+        await relayer.sendTransaction(request);
+        const userStake = await staking.userStake(alice.address, owner.address)
+        console.log({userStake:userStake.toString()})
+        assert.equal(userStake.toString(), amountToTransfer, "owner should have staked")
+
+
+        const withdrawRequest = await staking.connect(relayer).populateTransaction.withdraw(alice.address, amountToTransfer);
+        const withdrawNonce = await staking.nonce(owner.address)
+        const newWithdrawData = await returnForwardRequest(ethers, owner, staking, "withdraw", withdrawNonce, withdrawRequest)   
+        withdrawRequest.data = newWithdrawData
+        await relayer.sendTransaction(withdrawRequest);
+        const newUserStake = await staking.userStake(alice.address, owner.address)
+        console.log({userStake:newUserStake.toString()})
+        assert.equal(newUserStake.toString(), "0", "owner should have withdrawn")
+
+    });
 
     // it("stake a token for user", async function() {
     //     const amountToTransfer = '100000000000000000000'
