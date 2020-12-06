@@ -18,7 +18,7 @@ describe("Forwarder contract", function() {
         expect(formatted).to.equal("10000000.0");
     });
 
-    it.only("Send token from relayer function", async function() {
+    it("Send token from relayer function", async function() {
         const amountToTransfer = '1'
         const request = await staking.connect(relayer).populateTransaction.transfer(alice.address, amountToTransfer);
         const nonce = await staking.nonce(owner.address)
@@ -28,7 +28,12 @@ describe("Forwarder contract", function() {
         const balanceOfAlice = await staking.balanceOf(alice.address)
         assert.equal(balanceOfAlice.toString(), amountToTransfer, "alice should have one token")
     });
-    it.only("should deposit then withdraw relayer", async function() {
+    it("approve", async function() {})
+    it("increaseAllowance", async function() {})
+    it("decreseAllowance", async function() {})
+    it("transferFrom", async function() {})
+
+    it("should deposit then withdraw relayer", async function() {
         const amountToTransfer = '100000000000000000000'
         const request = await staking.connect(relayer).populateTransaction.deposit(alice.address, amountToTransfer);
         const nonce = await staking.nonce(owner.address)
@@ -48,18 +53,7 @@ describe("Forwarder contract", function() {
         const newUserStake = await staking.userStake(alice.address, owner.address)
         console.log({userStake:newUserStake.toString()})
         assert.equal(newUserStake.toString(), "0", "owner should have withdrawn")
-
     });
-
-    // it("stake a token for user", async function() {
-    //     const amountToTransfer = '100000000000000000000'
-    //     await approve(owner, amountToTransfer)
-    //     const request = await staking.connect(relayer).populateTransaction.deposit(bob.address, amountToTransfer);
-
-    //     const data = request.data
-    //     request.data = data + 'f39fd6e51aad88f6f4ce6ab8827279cfffb92266';
-        
-    //     const tx = await relayer.sendTransaction(request);
-    // });
+    it("setSplit", async function() {})
 
 });
