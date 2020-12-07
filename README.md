@@ -55,6 +55,9 @@ npx hardhat run scripts/deploy-script.js
 
 [] XDAI bridge
 
+[] Solutionize best way to get user earned per reward payout
+
+
 [] Add event tests
 
 [x] Add re entrancy guards
