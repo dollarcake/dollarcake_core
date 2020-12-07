@@ -78,13 +78,23 @@ describe("Forwarder contract", function() {
         await relayer.sendTransaction(request);
         const userStake = await staking.userStake(alice.address, owner.address)
         assert.equal(userStake.toString(), amountToTransfer, "owner should have staked")
-
-        await increaseTime(ethers)
+        
 
         const withdrawRequest = await staking.connect(relayer).populateTransaction.withdraw(alice.address, amountToTransfer);
         const withdrawNonce = await staking.nonce(owner.address)
         const newWithdrawData = await returnForwardRequest(ethers, owner, staking, "withdraw", withdrawNonce, withdrawRequest)   
         withdrawRequest.data = newWithdrawData
+        try {
+            await relayer.sendTransaction(withdrawRequest);
+			should.fail("The call should have failed but didn't")
+		} catch(e) {
+			assert.equal(
+				e.message, 
+				"VM Exception while processing transaction: revert wait more time"
+			)
+
+        }
+        await increaseTime(ethers)
         await relayer.sendTransaction(withdrawRequest);
         const newUserStake = await staking.userStake(alice.address, owner.address)
         assert.equal(newUserStake.toString(), "0", "owner should have withdrawn")
@@ -97,6 +107,17 @@ describe("Forwarder contract", function() {
         await relayer.sendTransaction(request);
         const stakerSplit = await staking.stakerSplit(owner.address)
         assert.equal(stakerSplit.toString(), "45", "new split should be set")
+
+        try {
+			await staking.setSplit(50)
+			should.fail("The call should have failed but didn't")
+		} catch(e) {
+			assert.equal(
+				e.message, 
+				"VM Exception while processing transaction: revert wait more time"
+			)
+
+        }
     })
 
 });
