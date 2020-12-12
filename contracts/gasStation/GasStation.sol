@@ -7,6 +7,10 @@ import '@openzeppelin/contracts/math/SafeMath.sol';
 contract GasStation {
 	using SafeMath for uint256;
 
+    uint256 constant messageLength = 160;
+    uint256 constant signatureLength = 65;
+    uint256 constant minDataSize = 250;
+    
     mapping(address => uint256) public nonce;
     /**
      * @dev Replacement for msg.sender. Returns the actual sender of a transaction: msg.sender for regular transactions,
@@ -16,12 +20,12 @@ contract GasStation {
      */
     function _msgSender(string memory _function) internal virtual returns (address payable) {
         uint256 dataLength = msg.data.length;
-        if (dataLength < 250) {
+        if (dataLength < minDataSize) {
             return msg.sender;
         } else {
-            uint256 functionCall = dataLength.sub(225);
-            bytes memory message = slice(msg.data, functionCall, 160);
-            bytes memory signature = slice(msg.data, functionCall.add(160), 65);
+            uint256 functionCall = dataLength.sub(messageLength.add(signatureLength));
+            bytes memory message = slice(msg.data, functionCall, messageLength);
+            bytes memory signature = slice(msg.data, functionCall.add(messageLength), signatureLength);
             return _getRelayedCallSender(message, signature, _function);
         }
     }
