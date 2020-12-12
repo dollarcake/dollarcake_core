@@ -10,7 +10,8 @@ contract GasStation {
     uint256 constant messageLength = 160;
     uint256 constant signatureLength = 65;
     uint256 constant minDataSize = 250;
-    
+    uint256 constant idLength = 20;
+    address constant gasStationId = address(0x48186f5038502e6b9c934Ca4bF36f07dF9E00E16);
     mapping(address => uint256) public nonce;
     /**
      * @dev Replacement for msg.sender. Returns the actual sender of a transaction: msg.sender for regular transactions,
@@ -22,12 +23,16 @@ contract GasStation {
         uint256 dataLength = msg.data.length;
         if (dataLength < minDataSize) {
             return msg.sender;
-        } else {
-            uint256 functionCall = dataLength.sub(messageLength.add(signatureLength));
-            bytes memory message = slice(msg.data, functionCall, messageLength);
-            bytes memory signature = slice(msg.data, functionCall.add(messageLength), signatureLength);
-            return _getRelayedCallSender(message, signature, _function);
+        } 
+        
+        if (_getAddress() != gasStationId) {
+            return msg.sender;
         }
+
+        uint256 functionCall = dataLength.sub(messageLength.add(signatureLength).add(idLength));
+        bytes memory message = slice(msg.data, functionCall, messageLength);
+        bytes memory signature = slice(msg.data, functionCall.add(messageLength), signatureLength);
+        return _getRelayedCallSender(message, signature, _function);
     }
 
     function _getRelayedCallSender(bytes memory _message, bytes memory _signature, string memory _function)
@@ -43,7 +48,7 @@ contract GasStation {
         return payable(returnedAddress);
     }
 
-    function _validateMessage(bytes memory _message, uint256 _nonce, string memory _function) internal {
+    function _validateMessage(bytes memory _message, uint256 _nonce, string memory _function) internal view {
         (address cake, uint256 userNonce, string memory userFunction) = abi.decode(_message, (address, uint256, string));
         require(cake == address(this), "address");
         require(userNonce == _nonce, "replay");
@@ -52,6 +57,36 @@ contract GasStation {
             "functionName"
         );       
     }
+
+     function _getAddress()
+        private
+        pure
+        returns (address payable result)
+    {
+        // We need to read 20 bytes (an address) located at array index msg.data.length - 20. In memory, the array
+        // is prefixed with a 32-byte length value, so we first add 32 to get the memory read index. However, doing
+        // so would leave the address in the upper 20 bytes of the 32-byte word, which is inconvenient and would
+        // require bit shifting. We therefore subtract 12 from the read index so the address lands on the lower 20
+        // bytes. This can always be done due to the 32-byte prefix.
+
+        // The final memory read index is msg.data.length - 20 + 32 - 12 = msg.data.length. Using inline assembly is the
+        // easiest/most-efficient way to perform this operation.
+
+        // These fields are not accessible from assembly
+        bytes memory array = msg.data;
+        uint256 index = msg.data.length;
+        // solhint-disable-next-line no-inline-assembly
+        assembly {
+            // Load the 32 bytes word from memory with the address on the lower 20 bytes, and mask those.
+            result := and(
+                mload(add(array, index)),
+                0xffffffffffffffffffffffffffffffffffffffff
+            )
+        }
+        return result;
+    }
+
+
 
     function slice(
         bytes memory _bytes,
