@@ -62,7 +62,12 @@ describe("long form staking contract", function() {
 		const calculatedBobDeposit = bobDeposit / 2
 		const daveStakeErin = await staking.userStake(erin.address, dave.address)
 		const daveStakeCharlie = await staking.userStake(charlie.address, dave.address)
-		
+		const aliceWithdrawable = await staking.withdrawable([charlie.address, erin.address], alice.address)
+		const aliceWithdrawableCharlie = await staking.withdrawPayout(charlie.address, aliceStake)
+		const aliceWithdrawableErin = await staking.withdrawPayout(erin.address, aliceStakeErin)
+
+		assert.equal(aliceWithdrawable[0].toString(), aliceWithdrawableCharlie.toString())
+		assert.equal(aliceWithdrawable[1].toString(), aliceWithdrawableErin.toString())
 		assert.equal(daveStakeCharlie.toString(), "0", "dave should have no stake in charlie")
 		assert.equal (daveStakeErin.toString(), "6000000000000000000", "dave should get proportionally less")
 		assert.equal(bobStake.toString(), calculatedBobDeposit.toString(), "bob stake should equal deposit")
@@ -101,6 +106,10 @@ describe("long form staking contract", function() {
 		const daveStakeAfter = await staking.userStake(erin.address, dave.address)
 		const balanceOfDaveAfter = await staking.balanceOf(dave.address)
 
+		// handle calling with no stake
+		const aliceWithdrawableAfter = await staking.withdrawable([charlie.address, erin.address], alice.address)
+		assert.equal(aliceWithdrawableAfter[0].toString(), "0")
+		assert.equal(aliceWithdrawableAfter[1].toString(), aliceWithdrawableErin.toString())
 
 		const calculatedAlicePayout = aliceDeposit * 2
 

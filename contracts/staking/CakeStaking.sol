@@ -103,4 +103,14 @@ contract CakeStaking is Global, ReentrancyGuard, GasStation, CakeToken {
 	function withdrawPayout(address _contentCreator, uint256 _userStake) public view returns (uint256) {
 		return _userStake.mul(creatorStaked[_contentCreator]).div(contentTotalPayout[_contentCreator]);
 	}
+
+	function withdrawable(address[] memory _contentCreators, address _user) public view returns (uint256[] memory) {
+		uint256[] memory withdrawableArray = new uint[](_contentCreators.length);
+		for (uint256 i = 0; i < _contentCreators.length; i++) { 
+			uint256 _userStake = userStake[_contentCreators[i]][_user];
+			uint256 _withdrawable = contentTotalPayout[_contentCreators[i]] != 0 ? withdrawPayout(_contentCreators[i], _userStake) : 0;
+			withdrawableArray[i] = _withdrawable;
+		}
+		return withdrawableArray;
+	}
 }
