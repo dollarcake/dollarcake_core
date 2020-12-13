@@ -75,4 +75,4 @@ npx hardhat run scripts/deploy-script.js
 [x] fix timelock issue 
 
 ## Deployed 
-* cake contract address 0x48186f5038502e6b9c934Ca4bF36f07dF9E00E16
+* cake contract address 0x38D49eFE6595371324Dd5D7Bc3254b3D41Bf1192

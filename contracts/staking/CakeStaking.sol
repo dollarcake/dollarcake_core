@@ -21,7 +21,7 @@ contract CakeStaking is Global, ReentrancyGuard, GasStation, CakeToken {
 	mapping (address => uint256) public contentTotalPayout; // amount of payouts for users of a CC
 
 	event Reward(address indexed contentCreator, uint256 total, uint256 stakerReward, uint256 contentCreatorReward);
-	event SplitUpdated(address contentCreator, uint256 newStakerPortion);
+	event SplitUpdated(address indexed contentCreator, uint256 newStakerPortion);
 	event UserDeposit(address indexed user, address indexed contentCreator, uint256 amountDespoited, uint256 payout);
 	event UserWithdrawal(address indexed user, address indexed contentCreator, uint256 payout, uint256 amountRecieved);
 
