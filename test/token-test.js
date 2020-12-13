@@ -1,8 +1,10 @@
-const { assert } = require("chai");
-const { ethers } = require("hardhat");
+const chai = require("chai");
+const { ethers, waffle } = require("hardhat");
 const { time } = require("@openzeppelin/test-helpers");
 const should = require("should");
 const { increaseTime } = require("../helpers/utils")
+chai.use(waffle.solidity);
+const { expect, assert } = chai;
 
 describe("token contract", function() {
     let owner, alice, bob, relayer, charlie, dave
@@ -17,7 +19,7 @@ describe("token contract", function() {
         staking = await Contract.deploy(name, symbol);
 	});
 	it('increase allowance ', async function () {
-		await staking.increaseAllowance(charlie.address, 10)
+		await expect(staking.increaseAllowance(charlie.address, 10)).to.emit(staking, "Approval").withArgs(owner.address, charlie.address, "10")
 		const allowance = await staking.allowance(
 		  owner.address,
 		  charlie.address
@@ -27,7 +29,7 @@ describe("token contract", function() {
 	
 	  it('decrease allowance ', async function () {
 		await staking.increaseAllowance(charlie.address, 10)
-		await staking.decreaseAllowance(charlie.address, 8)
+		await expect(staking.decreaseAllowance(charlie.address, 8)).to.emit(staking, "Approval").withArgs(owner.address, charlie.address, "2")
 		const allowance = await staking.allowance(
 		  owner.address,
 		  charlie.address
@@ -55,13 +57,13 @@ describe("token contract", function() {
 		assert.equal(result, decimals)
 	  })
 	  it('transfers', async function () {
-		  await staking.transfer(alice.address, amountToTransfer)
+		  await expect(staking.transfer(alice.address, amountToTransfer)).to.emit(staking, "Transfer").withArgs(owner.address, alice.address, amountToTransfer)
 		  const balanceOfAlice = await staking.balanceOf(alice.address)
 		  assert.equal(balanceOfAlice.toString(), amountToTransfer.toString(), "alice should have the proper balance")
 	  })
 	  it('transfers from', async function () {
 		await staking.increaseAllowance(charlie.address, 10)
-		await staking.connect(charlie).transferFrom(owner.address, alice.address, amountToTransfer)
+		await expect(staking.connect(charlie).transferFrom(owner.address, alice.address, amountToTransfer)).to.emit(staking, "Transfer").withArgs(owner.address, alice.address, amountToTransfer)
 		const balanceOfAlice = await staking.balanceOf(alice.address)
 		assert.equal(balanceOfAlice.toString(), amountToTransfer.toString(), "alice should have the proper balance")
 	  })
