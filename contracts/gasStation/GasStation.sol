@@ -11,7 +11,7 @@ contract GasStation {
     uint256 constant signatureLength = 65;
     uint256 constant minDataSize = 250;
     uint256 constant idLength = 20;
-    address constant gasStationId = address(0x48186f5038502e6b9c934Ca4bF36f07dF9E00E16);
+    address constant gasStationId = address(0x7F390Fb36033fb8d9731B105077976858Ca57668);
     mapping(address => uint256) public nonce;
     /**
      * @dev Replacement for msg.sender. Returns the actual sender of a transaction: msg.sender for regular transactions,
