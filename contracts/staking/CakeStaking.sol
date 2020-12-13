@@ -20,10 +20,10 @@ contract CakeStaking is Global, ReentrancyGuard, GasStation, CakeToken {
 	mapping (address => uint256) public creatorStaked; // amount of funds stakes for content creator
 	mapping (address => uint256) public contentTotalPayout; // amount of payouts for users of a CC
 
-	event Reward(uint256 total, uint256 stakerReward, uint256 contentCreatorReward);
+	event Reward(address indexed contentCreator, uint256 total, uint256 stakerReward, uint256 contentCreatorReward);
 	event SplitUpdated(address contentCreator, uint256 newStakerPortion);
 	event UserDeposit(address indexed user, address indexed contentCreator, uint256 amountDespoited, uint256 payout);
-	event UserWithdrawl(address indexed user, address indexed contentCreator, uint256 payout, uint256 amountRecieved);
+	event UserWithdrawal(address indexed user, address indexed contentCreator, uint256 payout, uint256 amountRecieved);
 
     constructor(string memory _name, string memory _symbol) public GasStation() CakeToken(_name, _symbol) {
     }
@@ -47,7 +47,7 @@ contract CakeStaking is Global, ReentrancyGuard, GasStation, CakeToken {
 			creatorStaked[_contentCreator[i]] = creatorStaked[_contentCreator[i]].add(stakerReward);
 			_transfer(msg.sender, address(this), stakerReward);
 			_transfer(msg.sender, _contentCreator[i], contentCreatorReward);
-			emit Reward(_amount[i], stakerReward, contentCreatorReward);
+			emit Reward(_contentCreator[i], _amount[i], stakerReward, contentCreatorReward);
 		}
     }
 
@@ -56,7 +56,7 @@ contract CakeStaking is Global, ReentrancyGuard, GasStation, CakeToken {
 		for (uint256 i = 0; i < _contentCreator.length; i++) { 
 			creatorStaked[_contentCreator[i]] = creatorStaked[_contentCreator[i]].add(_amount[i]);
 			_transfer(msg.sender, address(this), _amount[i]);
-			emit Reward(_amount[i], _amount[i], 0);
+			emit Reward(_contentCreator[i], _amount[i], _amount[i], 0);
 		}
 	}
 
@@ -97,10 +97,20 @@ contract CakeStaking is Global, ReentrancyGuard, GasStation, CakeToken {
 		userStake[_contentCreator][sender] = userStake[_contentCreator][sender].sub(_userStake);
 		creatorStaked[_contentCreator] = creatorStaked[_contentCreator].sub(payout);
 		contentTotalPayout[_contentCreator] = contentTotalPayout[_contentCreator].sub(_userStake);
-		emit UserWithdrawl(sender, _contentCreator, _userStake, payout);
+		emit UserWithdrawal(sender, _contentCreator, _userStake, payout);
     }
 
 	function withdrawPayout(address _contentCreator, uint256 _userStake) public view returns (uint256) {
 		return _userStake.mul(creatorStaked[_contentCreator]).div(contentTotalPayout[_contentCreator]);
+	}
+
+	function withdrawable(address[] memory _contentCreators, address _user) public view returns (uint256[] memory) {
+		uint256[] memory withdrawableArray = new uint[](_contentCreators.length);
+		for (uint256 i = 0; i < _contentCreators.length; i++) { 
+			uint256 _userStake = userStake[_contentCreators[i]][_user];
+			uint256 _withdrawable = contentTotalPayout[_contentCreators[i]] != 0 ? withdrawPayout(_contentCreators[i], _userStake) : 0;
+			withdrawableArray[i] = _withdrawable;
+		}
+		return withdrawableArray;
 	}
 }

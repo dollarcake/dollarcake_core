@@ -50,15 +50,17 @@ npx hardhat run scripts/deploy-script.js
 
 [x] GSN network positive tests
 
-[] GSN network negative tests
+[x] GSN network negative tests
 
 
 [] XDAI bridge
 
-[] Solutionize best way to get user earned per reward payout
+[] No Npm packages
+
+[x] Solutionize best way to get user earned per reward payout
 
 
-[] Add event tests
+[x] Add event tests
 
 [x] Add re entrancy guards
 

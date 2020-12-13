@@ -1,8 +1,11 @@
-const { assert } = require("chai");
-const { ethers } = require("hardhat");
+const chai = require("chai");
+const { ethers, waffle } = require("hardhat");
 const { time } = require("@openzeppelin/test-helpers");
 const should = require("should");
 const { increaseTime } = require("../helpers/utils")
+
+chai.use(waffle.solidity);
+const { expect, assert } = chai;
 
 describe("staking contract", function() {
     let factory;
@@ -21,7 +24,8 @@ describe("staking contract", function() {
 	it("should reward the contract properly", async function() {
 		const receivers = [alice.address, bob.address]
 		const amountToSend = ["1000000000000000000", "1000000000000000000"]
-		await staking.reward(receivers, amountToSend)
+		await expect(staking.reward(receivers, amountToSend)).to.emit(staking, "Reward").withArgs(receivers[1], amountToSend[1], (amountToSend[1] / 2).toString(), (amountToSend[1] / 2).toString())
+
 		
 		const balanceOfAlice = await staking.balanceOf(alice.address)
 		const balanceOfBob = await staking.balanceOf(bob.address)
@@ -58,7 +62,7 @@ describe("staking contract", function() {
 	})
 	it("should reward the contract properly on 75/25 split", async function() {
 		await staking.turnOffGlobalSplit()
-		await staking.connect(alice).setSplit(25)
+		await expect(staking.connect(alice).setSplit(25)).to.emit(staking, "SplitUpdated").withArgs(alice.address, "25")
 
 		const stakerPortion = await staking.stakerSplit(alice.address)
 
@@ -125,7 +129,7 @@ describe("staking contract", function() {
 		const receivers = [alice.address, bob.address]
 		const amounts = ["10", "10"]
 
-		await staking.rewardStakingPoolOnly(receivers, amounts)
+		await expect(staking.rewardStakingPoolOnly(receivers, amounts)).to.emit(staking, "Reward").withArgs(receivers[1], amounts[1], amounts[1], "0")
 
 		const stakingBalance = await staking.balanceOf(staking.address)
 		const aliceStakingBalance = await staking.creatorStaked(receivers[0])
@@ -167,7 +171,7 @@ describe("staking contract", function() {
 
 		}
 
-		await staking.connect(alice).deposit(charlie.address, aliceDeposit.toString())
+		await expect(staking.connect(alice).deposit(charlie.address, aliceDeposit.toString())).to.emit(staking, "UserDeposit").withArgs(alice.address, charlie.address, aliceDeposit.toString(), aliceDeposit.toString())
 
 		const aliceStake = await staking.userStake(charlie.address, alice.address)
 		assert.equal(aliceStake, aliceDeposit, "alice stake should equal deposit")
@@ -196,7 +200,7 @@ describe("staking contract", function() {
 		assert.equal(balanceOfBobBefore.toString(), "0", "bob should have no tokens")
 
 		await increaseTime(ethers)
-		await staking.connect(alice).withdraw(charlie.address, aliceStake)
+		await expect(staking.connect(alice).withdraw(charlie.address, aliceDeposit.toString())).to.emit(staking, "UserWithdrawal").withArgs(alice.address, charlie.address, aliceDeposit.toString(), aliceDeposit.toString())
 		await staking.connect(bob).withdraw(charlie.address, bobStake)
 
 		const aliceStakeAfter = await staking.userStake(charlie.address, alice.address)
