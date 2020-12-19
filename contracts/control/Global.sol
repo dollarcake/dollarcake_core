@@ -10,6 +10,8 @@ contract Global is Ownable {
 	uint256 public minInitialDeposit;
 	uint256 public globalStakerSplit;
 	uint256 public timeLock;
+	uint256 public fee;
+	address public dollarCake;
 	bool public isControlingSplit;
 
 	constructor () public {
@@ -17,6 +19,8 @@ contract Global is Ownable {
 		globalStakerSplit = 50;
 		minInitialDeposit = 10 ether; 
 		timeLock = 30 days;
+		dollarCake = msg.sender;
+		fee = 950;
 	}
 
 	function turnOffGlobalSplit() external onlyOwner {
@@ -35,6 +39,15 @@ contract Global is Ownable {
 	function changeTimeLock(uint256 _timeLock) external onlyOwner {
 		require(_timeLock >= 1 hours, "not in bounds");
 		timeLock = _timeLock;
+	}
+
+	function changeFee(uint256 _fee) external onlyOwner {
+		require(_fee <= 1000 && _fee >= 930, "not in bounds");
+		fee = _fee;
+	}
+
+	function changeDollarCakeAddress(address _dollarCake) external onlyOwner {
+		dollarCake = _dollarCake;
 	}
 
 }

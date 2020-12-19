@@ -6,12 +6,15 @@ const { increaseTime } = require("../helpers/utils")
 
 describe("long form staking contract", function() {
     let factory;
-    let owner, alice, bob, relayer, charlie, dave, erin
+	let owner, alice, bob, relayer, charlie, dave, erin
+	let fee
 
     beforeEach(async () => {
 		[owner, alice, bob, relayer, charlie, dave, erin] = await ethers.getSigners();
         Contract = await ethers.getContractFactory("CakeStaking");
-        staking = await Contract.deploy("cake", "cake");
+		staking = await Contract.deploy("cake", "cake");
+		fee = await staking.fee()
+		fee = fee / 1000
 	});
 	it("should deposit and withdraw alice bob dave while extra tokens added before bob and charlies deposits to multiple creators", async function() {
 		// roles, stakers, alice bob dave, CC charlie, erin
@@ -59,7 +62,6 @@ describe("long form staking contract", function() {
 		const bobStake = await staking.userStake(charlie.address, bob.address)
 		const bobStakeErin = await staking.userStake(erin.address, bob.address)
 
-		const calculatedBobDeposit = bobDeposit / 2
 		const daveStakeErin = await staking.userStake(erin.address, dave.address)
 		const daveStakeCharlie = await staking.userStake(charlie.address, dave.address)
 		const aliceWithdrawable = await staking.withdrawable([charlie.address, erin.address], alice.address)
@@ -69,8 +71,8 @@ describe("long form staking contract", function() {
 		assert.equal(aliceWithdrawable[0].toString(), aliceWithdrawableCharlie.toString())
 		assert.equal(aliceWithdrawable[1].toString(), aliceWithdrawableErin.toString())
 		assert.equal(daveStakeCharlie.toString(), "0", "dave should have no stake in charlie")
-		assert.equal (daveStakeErin.toString(), "6000000000000000000", "dave should get proportionally less")
-		assert.equal(bobStake.toString(), calculatedBobDeposit.toString(), "bob stake should equal deposit")
+		assert.equal (daveStakeErin.toString(), "6122448979591836734", "dave should get proportionally less")
+		assert.equal(bobStake.toString(), "5128205128205128205", "bob stake should be correct")
 		assert.equal(bobStakeErin.toString(), bobDeposit.toString(), "bob stake should equal deposit")
 
 		try {
@@ -111,15 +113,15 @@ describe("long form staking contract", function() {
 		assert.equal(aliceWithdrawableAfter[0].toString(), "0")
 		assert.equal(aliceWithdrawableAfter[1].toString(), aliceWithdrawableErin.toString())
 
-		const calculatedAlicePayout = aliceDeposit * 2
+		const calculatedAlicePayout = aliceDeposit + (aliceDeposit * fee)
 
 		assert.equal(aliceStakeAfter.toString(), "0", "alice should have no stake")
-		assert.equal(balanceOfAliceAfter, calculatedAlicePayout, "alice should have original amount of tokens")
+		assert.equal(balanceOfAliceAfter.toString(), calculatedAlicePayout.toString(), "alice should have original amount of tokens")
 
 		assert.equal(bobStakeAfter.toString(), "0", "bob should have no stake")
 		assert.equal(balanceOfBobAfter, bobDeposit, "alice should have original amount of tokens")
 
 		assert.equal(daveStakeAfter.toString(), "0", "dave should have no stake")
-		assert.equal(balanceOfDaveAfter.toString(), daveDeposit.toString(), "dave should have original amount of tokens")
+		assert.closeTo(Number(balanceOfDaveAfter), Number(daveDeposit), 1,"dave should have original amount of tokens")
 	})
 })

@@ -68,11 +68,15 @@ npx hardhat run scripts/deploy-script.js
 
 [x] add pool reward 
 
-[] token tests
+[x] token tests
 
 [x] more long form testing
 
 [x] fix timelock issue 
+
+[] snapshot token
+
+[x] cpm fee 0-7% globally contrallable 
 
 ## Deployed 
 * cake contract address 0x38D49eFE6595371324Dd5D7Bc3254b3D41Bf1192
