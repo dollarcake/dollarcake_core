@@ -11,7 +11,7 @@ describe("staking contract", function() {
 	let owner, alice, bob, relayer, charlie, dave
 	let fee
 	const toTransfer = "100"
-
+	const totalSupply = "10000000000000000000000000"
     beforeEach(async () => {
 		[owner, alice, bob, relayer, charlie, dave] = await ethers.getSigners();
         Contract = await ethers.getContractFactory("CakeStaking");
@@ -27,6 +27,7 @@ describe("staking contract", function() {
 		const balanceOfOAliceAt = await staking.balanceOfAt(alice.address, "1")
 		const balanceOfAlice = await staking.balanceOf(alice.address)
 		const balanceOfOOwnerAt = await staking.balanceOfAt(owner.address, "1")
+		const totalSupplyAt = await staking.totalSupplyAt("1")
 		const balanceOfOwner = await staking.balanceOf(owner.address)
 		const calculatedBalanceOfOwner = balanceOfOwnerBefore.sub(ethers.BigNumber.from(toTransfer))
 		assert.equal(balanceOfAlice.toString(), toTransfer, "alice should have 100 tokens")
@@ -35,7 +36,7 @@ describe("staking contract", function() {
 
 		assert.equal(balanceOfOwnerBefore.toString(), balanceOfOOwnerAt.toString(), "owner should have proper snapshot check")
 		assert.equal(balanceOfOwner.toString(), calculatedBalanceOfOwner.toString(), "alice should have 100 tokens")
-	
+		assert.equal(totalSupplyAt.toString(), totalSupply)
 
 	})
 	it('should transferFrom and get snapshot', async () => {
@@ -44,6 +45,7 @@ describe("staking contract", function() {
 		await staking.approve(alice.address, toTransfer)
 		await staking.connect(alice).transferFrom(owner.address, alice.address, toTransfer)
 		const balanceOfOAliceAt = await staking.balanceOfAt(alice.address, "1")
+		const totalSupplyAt = await staking.totalSupplyAt("1")
 		const balanceOfAlice = await staking.balanceOf(alice.address)
 		const balanceOfOOwnerAt = await staking.balanceOfAt(owner.address, "1")
 		const balanceOfOwner = await staking.balanceOf(owner.address)
@@ -54,6 +56,7 @@ describe("staking contract", function() {
 
 		assert.equal(balanceOfOwnerBefore.toString(), balanceOfOOwnerAt.toString(), "owner should have proper snapshot check")
 		assert.equal(balanceOfOwner.toString(), calculatedBalanceOfOwner.toString(), "alice should have 100 tokens")
+		assert.equal(totalSupplyAt.toString(), totalSupply)
 	})
 	it('should take a snapshot', async () => {
 		const currentSnapshotBefore = await staking.currentSnapshot()
