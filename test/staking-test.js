@@ -24,6 +24,7 @@ describe("staking contract", function() {
 		assert.equal(timeLock.toString(), time.duration.days(30).toString())
 	})
 	it("should reward the contract properly", async function() {
+		await staking.changeDollarCakeAddress(dave.address)
 		const receivers = [alice.address, bob.address]
 		const amountToSend = ["1000000000000000000", "1000000000000000000"]
 		const amountToSendMinusFee = Number(amountToSend[1]) * fee
@@ -37,13 +38,14 @@ describe("staking contract", function() {
 		const bobStake = await staking.creatorStaked(bob.address)
 		const balanceOfContract = await staking.balanceOf(staking.address)
 		const calculatedAmount = Number(amountToSend[0]) / 2 * fee
-		
+		const cakeAddressBalance = await staking.balanceOf(dave.address)
+		const calculatedCakeAddressBalance = dollarCakeFee * 2
 		assert.equal(balanceOfAlice.toString(), calculatedAmount.toString(), "alice should have got half the payout")
 		assert.equal(aliceStake.toString(), calculatedAmount.toString(), "contract should have got half the payout")
 		assert.equal(balanceOfBob.toString(), calculatedAmount.toString(), "alice should have got half the payout")
 		assert.equal(bobStake.toString(), calculatedAmount.toString(), "contract should have got half the payout")
 		assert.equal(balanceOfContract.toString(), (calculatedAmount.toString() * 2), "contract should have got half the payout")
-
+		assert.equal(cakeAddressBalance.toString(), calculatedCakeAddressBalance.toString(), "cake address should have got rewarded")
 	})
 	it("should load test the reward function", async function() {
 		const receivers = Array(225).fill(alice.address)
