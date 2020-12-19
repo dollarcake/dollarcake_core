@@ -74,7 +74,9 @@ npx hardhat run scripts/deploy-script.js
 
 [x] fix timelock issue 
 
-[] snapshot token
+[x] snapshot token
+
+[] handle being able to track tokens inside the contract and wallet
 
 [x] cpm fee 0-7% globally contrallable 
 
