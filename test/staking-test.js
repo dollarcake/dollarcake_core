@@ -27,7 +27,8 @@ describe("staking contract", function() {
 		const receivers = [alice.address, bob.address]
 		const amountToSend = ["1000000000000000000", "1000000000000000000"]
 		const amountToSendMinusFee = Number(amountToSend[1]) * fee
-		await expect(staking.reward(receivers, amountToSend)).to.emit(staking, "Reward").withArgs(receivers[1], amountToSend[1], (amountToSendMinusFee / 2).toString(), (amountToSendMinusFee / 2).toString())
+		const dollarCakeFee = Number(amountToSend[1]) * (1 - fee).toFixed(2)
+		await expect(staking.reward(receivers, amountToSend)).to.emit(staking, "Reward").withArgs(receivers[1], amountToSend[1], (amountToSendMinusFee / 2).toString(), (amountToSendMinusFee / 2).toString(), dollarCakeFee.toString())
 
 		
 		const balanceOfAlice = await staking.balanceOf(alice.address)
@@ -132,7 +133,7 @@ describe("staking contract", function() {
 		const receivers = [alice.address, bob.address]
 		const amounts = ["10", "10"]
 
-		await expect(staking.rewardStakingPoolOnly(receivers, amounts)).to.emit(staking, "Reward").withArgs(receivers[1], amounts[1], amounts[1], "0")
+		await expect(staking.rewardStakingPoolOnly(receivers, amounts)).to.emit(staking, "Reward").withArgs(receivers[1], amounts[1], amounts[1], "0", "0")
 
 		const stakingBalance = await staking.balanceOf(staking.address)
 		const aliceStakingBalance = await staking.creatorStaked(receivers[0])
