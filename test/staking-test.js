@@ -8,13 +8,15 @@ chai.use(waffle.solidity);
 const { expect, assert } = chai;
 
 describe("staking contract", function() {
-    let factory;
-    let owner, alice, bob, relayer, charlie, dave
+	let owner, alice, bob, relayer, charlie, dave
+	let fee
 
     beforeEach(async () => {
 		[owner, alice, bob, relayer, charlie, dave] = await ethers.getSigners();
         Contract = await ethers.getContractFactory("CakeStaking");
-        staking = await Contract.deploy("cake", "cake");
+		staking = await Contract.deploy("cake", "cake");
+		fee = await staking.fee()
+		fee = fee / 1000
 	});
 
 	it("properly sets information in constructor", async function() {
@@ -22,9 +24,12 @@ describe("staking contract", function() {
 		assert.equal(timeLock.toString(), time.duration.days(30).toString())
 	})
 	it("should reward the contract properly", async function() {
+		await staking.changeDollarCakeAddress(dave.address)
 		const receivers = [alice.address, bob.address]
 		const amountToSend = ["1000000000000000000", "1000000000000000000"]
-		await expect(staking.reward(receivers, amountToSend)).to.emit(staking, "Reward").withArgs(receivers[1], amountToSend[1], (amountToSend[1] / 2).toString(), (amountToSend[1] / 2).toString())
+		const amountToSendMinusFee = Number(amountToSend[1]) * fee
+		const dollarCakeFee = Number(amountToSend[1]) * (1 - fee).toFixed(2)
+		await expect(staking.reward(receivers, amountToSend)).to.emit(staking, "Reward").withArgs(receivers[1], amountToSend[1], (amountToSendMinusFee / 2).toString(), (amountToSendMinusFee / 2).toString(), dollarCakeFee.toString())
 
 		
 		const balanceOfAlice = await staking.balanceOf(alice.address)
@@ -32,18 +37,19 @@ describe("staking contract", function() {
 		const aliceStake = await staking.creatorStaked(alice.address)
 		const bobStake = await staking.creatorStaked(bob.address)
 		const balanceOfContract = await staking.balanceOf(staking.address)
-		const calculatedAmount = Number(amountToSend[0]) / 2 
-		
+		const calculatedAmount = Number(amountToSend[0]) / 2 * fee
+		const cakeAddressBalance = await staking.balanceOf(dave.address)
+		const calculatedCakeAddressBalance = dollarCakeFee * 2
 		assert.equal(balanceOfAlice.toString(), calculatedAmount.toString(), "alice should have got half the payout")
 		assert.equal(aliceStake.toString(), calculatedAmount.toString(), "contract should have got half the payout")
 		assert.equal(balanceOfBob.toString(), calculatedAmount.toString(), "alice should have got half the payout")
 		assert.equal(bobStake.toString(), calculatedAmount.toString(), "contract should have got half the payout")
 		assert.equal(balanceOfContract.toString(), (calculatedAmount.toString() * 2), "contract should have got half the payout")
-
+		assert.equal(cakeAddressBalance.toString(), calculatedCakeAddressBalance.toString(), "cake address should have got rewarded")
 	})
 	it("should load test the reward function", async function() {
-		const receivers = Array(225).fill(alice.address)
-		const amountToSend = Array(225).fill("1000000000000000000")
+		const receivers = Array(200).fill(alice.address)
+		const amountToSend = Array(200).fill("1000000000000000000")
 		await staking.reward(receivers, amountToSend)
 	})
 	it("should fail to reward mismatch", async function() {
@@ -72,8 +78,8 @@ describe("staking contract", function() {
 		await staking.reward([alice.address], [amountToSend])
 		const balanceOfAlice = await staking.balanceOf(alice.address)
 		const balanceOfContract = await staking.balanceOf(staking.address)
-		const calculatedAmountAlice = Number(amountToSend) * 3 / 4
-		const calculatedAmountContract = Number(amountToSend) / 4
+		const calculatedAmountAlice = Number(amountToSend) * 3 / 4 * fee
+		const calculatedAmountContract = Number(amountToSend) / 4 * fee
 		
 		assert.equal(balanceOfAlice.toString(), calculatedAmountAlice.toString(), "alice should have got half the payout")
 		assert.equal(balanceOfContract.toString(), calculatedAmountContract.toString(), "contract should have got half the payout")
@@ -129,7 +135,7 @@ describe("staking contract", function() {
 		const receivers = [alice.address, bob.address]
 		const amounts = ["10", "10"]
 
-		await expect(staking.rewardStakingPoolOnly(receivers, amounts)).to.emit(staking, "Reward").withArgs(receivers[1], amounts[1], amounts[1], "0")
+		await expect(staking.rewardStakingPoolOnly(receivers, amounts)).to.emit(staking, "Reward").withArgs(receivers[1], amounts[1], amounts[1], "0", "0")
 
 		const stakingBalance = await staking.balanceOf(staking.address)
 		const aliceStakingBalance = await staking.creatorStaked(receivers[0])
@@ -245,9 +251,9 @@ describe("staking contract", function() {
 		await staking.connect(bob).deposit(charlie.address, bobDeposit.toString())
 
 		const bobStake = await staking.userStake(charlie.address, bob.address)
-		const calculatedBobDeposit = bobDeposit / 2
+		const calculatedBobDeposit = bobDeposit / 2 * fee
 		
-		assert.equal(bobStake.toString(), calculatedBobDeposit.toString(), "bob stake should equal deposit")
+		assert.equal(bobStake.toString(), "6410256410256410256", "bob stake should equal deposit")
 
 		try {
 			await staking.connect(alice).withdraw(charlie.address, 10)
@@ -284,8 +290,8 @@ describe("staking contract", function() {
 		const calculatedAlicePayout = aliceDeposit * 2
 
 		assert.equal(aliceStakeAfter.toString(), "0", "alice should have no stake")
-		assert.equal(withdrawPayout.toString(), calculatedAlicePayout.toString(), "getter function should work properly")
-		assert.equal(balanceOfAliceAfter, calculatedAlicePayout, "alice should have original amount of tokens")
+		assert.equal(withdrawPayout.toString(), "34125000000000000000", "getter function should work properly")
+		assert.equal(balanceOfAliceAfter.toString(), "34125000000000000000", "alice should have original amount of tokens")
 
 		assert.equal(bobStakeAfter.toString(), "0", "bob should have no stake")
 		assert.equal(balanceOfBobAfter, bobDeposit, "alice should have original amount of tokens")

@@ -31,6 +31,8 @@ async function main() {
     console.log("ownership transfer", tx1)
     const tx2 = await contract.transfer(mainAddress, "10000000000000000000000000")
     console.log("tokens tramsfer", tx2)
+    const tx3 = await contract.changeDollarCakeAddress(mainAddress)
+    console.log("fee address changed", tx3)
 
 }
 

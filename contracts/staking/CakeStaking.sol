@@ -20,7 +20,7 @@ contract CakeStaking is Global, ReentrancyGuard, GasStation, CakeToken {
 	mapping (address => uint256) public creatorStaked; // amount of funds stakes for content creator
 	mapping (address => uint256) public contentTotalPayout; // amount of payouts for users of a CC
 
-	event Reward(address indexed contentCreator, uint256 total, uint256 stakerReward, uint256 contentCreatorReward);
+	event Reward(address indexed contentCreator, uint256 total, uint256 stakerReward, uint256 contentCreatorReward, uint256 dollarCakeFee);
 	event SplitUpdated(address indexed contentCreator, uint256 newStakerPortion);
 	event UserDeposit(address indexed user, address indexed contentCreator, uint256 amountDespoited, uint256 payout);
 	event UserWithdrawal(address indexed user, address indexed contentCreator, uint256 payout, uint256 amountRecieved);
@@ -42,12 +42,16 @@ contract CakeStaking is Global, ReentrancyGuard, GasStation, CakeToken {
 			} else {
 				_stakerSplit = stakerSplit[_contentCreator[i]] == uint256(0) ? uint256(50) : stakerSplit[_contentCreator[i]];
 			}
-			uint256 stakerReward = _amount[i].mul(_stakerSplit).div(100);
-			uint256 contentCreatorReward = _amount[i].sub(stakerReward);
+			uint256 amountMinusFee = _amount[i].mul(fee).div(1000);
+			uint256 dollarCakeFee = _amount[i].sub(amountMinusFee);
+			uint256 stakerReward = amountMinusFee.mul(_stakerSplit).div(100);
+			uint256 contentCreatorReward = amountMinusFee.sub(stakerReward);
 			creatorStaked[_contentCreator[i]] = creatorStaked[_contentCreator[i]].add(stakerReward);
+			
 			_transfer(msg.sender, address(this), stakerReward);
 			_transfer(msg.sender, _contentCreator[i], contentCreatorReward);
-			emit Reward(_contentCreator[i], _amount[i], stakerReward, contentCreatorReward);
+			_transfer(msg.sender, dollarCake, dollarCakeFee);
+			emit Reward(_contentCreator[i], _amount[i], stakerReward, contentCreatorReward, dollarCakeFee);
 		}
     }
 
@@ -56,7 +60,7 @@ contract CakeStaking is Global, ReentrancyGuard, GasStation, CakeToken {
 		for (uint256 i = 0; i < _contentCreator.length; i++) { 
 			creatorStaked[_contentCreator[i]] = creatorStaked[_contentCreator[i]].add(_amount[i]);
 			_transfer(msg.sender, address(this), _amount[i]);
-			emit Reward(_contentCreator[i], _amount[i], _amount[i], 0);
+			emit Reward(_contentCreator[i], _amount[i], _amount[i], 0, 0);
 		}
 	}
 
