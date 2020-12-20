@@ -83,6 +83,7 @@ npx hardhat run scripts/deploy-script.js
 [x] add params to gas station check
 
 ## Deployed 
-* cake contract address 0xd4BA4D373E3124D0b2D0fea5c7427F8EaA60676c
+* cake contract address 0x05951564A17A2f7b61723062FC5219816920756B
+
 
 
