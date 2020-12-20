@@ -9,7 +9,7 @@ contract GasStation {
 
     uint256 constant messageLength = 256;
     uint256 constant signatureLength = 65;
-    uint256 constant minDataSize = 250;
+    uint256 constant minDataSize = 300;
     uint256 constant idLength = 20;
     address constant gasStationId = address(0x7F390Fb36033fb8d9731B105077976858Ca57668);
     mapping(address => uint256) public nonce;
@@ -28,8 +28,6 @@ contract GasStation {
             return msg.sender;
         }
 
-        bytes32 functionHash = keccak256(abi.encodePacked(_function));
-
         uint256 functionCall = msg.data.length.sub(messageLength.add(signatureLength).add(idLength));
         bytes memory message = slice(msg.data, functionCall, messageLength);
         bytes memory signature = slice(msg.data, functionCall.add(messageLength), signatureLength);
@@ -40,13 +38,14 @@ contract GasStation {
         return returnedAddress;
     }
 
-    function _validate(bytes memory _message, string memory _function, address _address1, uint256 _number1, address _address2, uint256 nonce) internal {
+    function _validate(bytes memory _message, string memory _function, address _address1, uint256 _number1, address _address2, uint256 _nonce) internal view {
         (address cake, uint256 userNonce, string memory userFunction, address userAddress1, uint256 userNumber1, address userAddress2) = abi.decode(_message, (address, uint256, string, address, uint256, address));
-        _validateMessage(_function, _address1, _number1, _address2, userAddress1, userNumber1, userAddress2, cake, nonce, userNonce, userFunction);
+        _validateMessage(_function, _address1, _number1, _address2, userAddress1, userNumber1, userAddress2, cake, _nonce, userNonce, userFunction);
     }
 
     function _getRelayedCallSender(bytes memory _message, bytes memory _signature)
         internal
+        pure
         returns (address payable)
     {
         bytes32 hash = keccak256(abi.encodePacked("\x19Ethereum Signed Message:\n32", keccak256(_message)));
