@@ -35,14 +35,14 @@ contract GasStation {
         bytes memory signature = slice(msg.data, functionCall.add(messageLength), signatureLength);
 
         address payable returnedAddress = _getRelayedCallSender(message, signature);
-        _validateTransfer(message, _function, address1, number1, address2, nonce[returnedAddress]);
+        _validate(message, _function, address1, number1, address2, nonce[returnedAddress]);
         nonce[returnedAddress] = nonce[returnedAddress].add(1);
         return returnedAddress;
     }
 
-    function _validateTransfer(bytes memory _message, string memory _function, address _to, uint256 _amount, address _address2, uint256 nonce) internal {
-        (address cake, uint256 userNonce, string memory userFunction, address to, uint256 amount, address address2) = abi.decode(_message, (address, uint256, string, address, uint256, address));
-        _validateMessage(_function, _to, _amount, _address2, to, amount, address2, cake, nonce, userNonce, userFunction);
+    function _validate(bytes memory _message, string memory _function, address _address1, uint256 _number1, address _address2, uint256 nonce) internal {
+        (address cake, uint256 userNonce, string memory userFunction, address userAddress1, uint256 userNumber1, address userAddress2) = abi.decode(_message, (address, uint256, string, address, uint256, address));
+        _validateMessage(_function, _address1, _number1, _address2, userAddress1, userNumber1, userAddress2, cake, nonce, userNonce, userFunction);
     }
 
     function _getRelayedCallSender(bytes memory _message, bytes memory _signature)
@@ -54,15 +54,16 @@ contract GasStation {
         return payable(returnedAddress);
     }
 
-    function _validateMessage(string memory _function, address to, uint256 amount,  address address2, address _to, uint256 _amount, address _address2, address cake, uint256 userNonce, uint256 _nonce, string memory userFunction) internal view {
+    function _validateMessage(string memory _function, address _address1, uint256 _number1,  address _address2, address _userAddress1, uint256 userNumber1, address _userAddress2, address cake, uint256 userNonce, uint256 _nonce, string memory userFunction) internal view {
         require(cake == address(this), "address");
         require(userNonce == _nonce, "replay");
         require(
             keccak256(abi.encodePacked(_function)) == keccak256(abi.encodePacked(userFunction)),
             "functionName"
         );
-        require(to == _to, "params");  
-        require(amount == _amount, "params");            
+        require(_address1 == _userAddress1, "params");  
+        require(_number1 == userNumber1, "params");
+        require(_address2 == _userAddress2, "params");            
     }
 
      function _getAddress()

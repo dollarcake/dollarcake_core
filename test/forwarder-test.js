@@ -34,7 +34,7 @@ describe("Forwarder contract", function() {
         const amountToTransfer = '100000000000000000000'
         const request = await staking.connect(relayer).populateTransaction.increaseAllowance(alice.address, amountToTransfer);
         const nonce = await staking.nonce(owner.address)
-        const newData = await returnForwardRequest(ethers, owner, staking, "increaseAllowance", nonce, request)   
+        const newData = await returnForwardRequest(ethers, owner, staking, "increaseAllowance", nonce, request, {to: alice.address, amount: amountToTransfer, from: NULL_ADDRESS})   
         request.data = newData
         await relayer.sendTransaction(request);
         const allowanceOfAlice = await staking.allowance(owner.address, alice.address)
@@ -43,7 +43,7 @@ describe("Forwarder contract", function() {
 
         const decreaseRequest = await staking.connect(relayer).populateTransaction.decreaseAllowance(alice.address, amountToTransfer);
         const decreaseNonce = await staking.nonce(owner.address)
-        const decreaseNewData = await returnForwardRequest(ethers, owner, staking, "decreaseAllowance", decreaseNonce, decreaseRequest)   
+        const decreaseNewData = await returnForwardRequest(ethers, owner, staking, "decreaseAllowance", decreaseNonce, decreaseRequest, {to: alice.address, amount: amountToTransfer, from: NULL_ADDRESS})   
         decreaseRequest.data = decreaseNewData
         await relayer.sendTransaction(decreaseRequest);
         const allowanceOfAliceAfter = await staking.allowance(owner.address, alice.address)
@@ -55,7 +55,7 @@ describe("Forwarder contract", function() {
         const amountToTransfer = '100000000000000000000'
         const request = await staking.connect(relayer).populateTransaction.approve(alice.address, amountToTransfer);
         const nonce = await staking.nonce(owner.address)
-        const newData = await returnForwardRequest(ethers, owner, staking, "approve", nonce, request)   
+        const newData = await returnForwardRequest(ethers, owner, staking, "approve", nonce, request, {to: alice.address, amount: amountToTransfer, from: NULL_ADDRESS})   
         request.data = newData
         await relayer.sendTransaction(request);
         const allowanceOfAlice = await staking.allowance(owner.address, alice.address)
@@ -63,7 +63,7 @@ describe("Forwarder contract", function() {
 
         const transferFromRequest = await staking.connect(relayer).populateTransaction.transferFrom(owner.address, alice.address, amountToTransfer);
         const transferFromNonce = await staking.nonce(alice.address)
-        const transferFromNewData = await returnForwardRequest(ethers, alice, staking, "transferFrom", transferFromNonce, transferFromRequest)   
+        const transferFromNewData = await returnForwardRequest(ethers, alice, staking, "transferFrom", transferFromNonce, transferFromRequest, {to: alice.address, amount: amountToTransfer, from: owner.address})   
         transferFromRequest.data = transferFromNewData
         await relayer.sendTransaction(transferFromRequest);
         const balanceOfAlice = await staking.balanceOf(alice.address)
@@ -74,7 +74,7 @@ describe("Forwarder contract", function() {
         const amountToTransfer = '100000000000000000000'
         const request = await staking.connect(relayer).populateTransaction.deposit(alice.address, amountToTransfer);
         const nonce = await staking.nonce(owner.address)
-        const newData = await returnForwardRequest(ethers, owner, staking, "deposit", nonce, request)   
+        const newData = await returnForwardRequest(ethers, owner, staking, "deposit", nonce, request, {to: alice.address, amount: amountToTransfer, from: NULL_ADDRESS})   
         request.data = newData
         await relayer.sendTransaction(request);
         const userStake = await staking.userStake(alice.address, owner.address)
@@ -83,7 +83,7 @@ describe("Forwarder contract", function() {
 
         const withdrawRequest = await staking.connect(relayer).populateTransaction.withdraw(alice.address, amountToTransfer);
         const withdrawNonce = await staking.nonce(owner.address)
-        const newWithdrawData = await returnForwardRequest(ethers, owner, staking, "withdraw", withdrawNonce, withdrawRequest)   
+        const newWithdrawData = await returnForwardRequest(ethers, owner, staking, "withdraw", withdrawNonce, withdrawRequest, {to: alice.address, amount: amountToTransfer, from: NULL_ADDRESS})   
         withdrawRequest.data = newWithdrawData
         try {
             await relayer.sendTransaction(withdrawRequest);
@@ -103,7 +103,7 @@ describe("Forwarder contract", function() {
     it("setSplit", async function() {
         const request = await staking.connect(relayer).populateTransaction.setSplit(45);
         const nonce = await staking.nonce(owner.address)
-        const newData = await returnForwardRequest(ethers, owner, staking, "setSplit", nonce, request)   
+        const newData = await returnForwardRequest(ethers, owner, staking, "setSplit", nonce, request, {to: NULL_ADDRESS, amount: 45, from: NULL_ADDRESS})   
         request.data = newData
         await relayer.sendTransaction(request);
         const stakerSplit = await staking.stakerSplit(owner.address)

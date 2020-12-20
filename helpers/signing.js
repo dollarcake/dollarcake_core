@@ -8,7 +8,6 @@ const returnForwardRequest = async (ethers, signer, staking, functionName, nonce
     ["address", "uint256", "string", "address", "uint256", "uint256"],
     [staking.address, nonce, functionName, to, amount, from]
   );
-  console.log(ethers.utils.arrayify(message).length)
   const messageHash = ethers.utils.keccak256(message);
   const messageHashBytes = ethers.utils.arrayify(messageHash);
   let signedMessage = await signer.signMessage(messageHashBytes);
