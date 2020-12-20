@@ -123,7 +123,7 @@ contract ERC20 is IERC20, GasStation {
         override
         returns (bool)
     {
-        address payable sender = _msgSender("transfer");
+        address payable sender = _msgSender("transfer", recipient, amount, address(0));
         _transfer(sender, recipient, amount);
         return true;
     }
@@ -154,7 +154,7 @@ contract ERC20 is IERC20, GasStation {
         override
         returns (bool)
     {
-         address payable sender = _msgSender("approve");
+         address payable sender = _msgSender("approve", spender, amount, address(0));
         _approve(sender, spender, amount);
         return true;
     }
@@ -176,7 +176,7 @@ contract ERC20 is IERC20, GasStation {
         address recipient,
         uint256 amount
     ) public virtual override returns (bool) {
-        address payable _sender = _msgSender("transferFrom");
+        address payable _sender = _msgSender("transferFrom", recipient, amount, sender);
         _transfer(sender, recipient, amount);
         _approve(
             sender,
@@ -206,7 +206,7 @@ contract ERC20 is IERC20, GasStation {
         virtual
         returns (bool)
     {
-        address payable sender = _msgSender("increaseAllowance");
+        address payable sender = _msgSender("increaseAllowance", spender, addedValue, address(0));
         _approve(
             sender,
             spender,
@@ -234,7 +234,7 @@ contract ERC20 is IERC20, GasStation {
         virtual
         returns (bool)
     {
-        address payable sender = _msgSender("decreaseAllowance");
+        address payable sender = _msgSender("decreaseAllowance", spender, subtractedValue, address(0));
         _approve(
             sender,
             spender,

@@ -80,8 +80,9 @@ npx hardhat run scripts/deploy-script.js
 
 [x] cpm fee 0-7% globally contrallable 
 
-[] add params to gas station check
+[x] add params to gas station check
 
 ## Deployed 
-* cake contract address 0x38D49eFE6595371324Dd5D7Bc3254b3D41Bf1192
+* cake contract address 0xd4BA4D373E3124D0b2D0fea5c7427F8EaA60676c
+
 
