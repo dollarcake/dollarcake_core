@@ -28,8 +28,8 @@ contract CakeStaking is Global, ReentrancyGuard, GasStation, CakeToken {
     constructor(string memory _name, string memory _symbol) public GasStation() CakeToken(_name, _symbol) {
     }
 
-	function _msgSender(string memory _function) internal override(GasStation) returns (address payable) {
-   		return super._msgSender(_function);
+	function _msgSender(string memory _function, address address1, uint256 number1, address address2) internal override(GasStation) returns (address payable) {
+   		return super._msgSender(_function, address1, number1, address2);
 	}
 
 
@@ -66,7 +66,7 @@ contract CakeStaking is Global, ReentrancyGuard, GasStation, CakeToken {
 
     function setSplit(uint256 _newStakerPortion) public nonReentrant {
 		require(_newStakerPortion <= 90 && _newStakerPortion >= 10, "not in bounds");
-		address payable sender = _msgSender("setSplit");
+		address payable sender = _msgSender("setSplit", address(0), _newStakerPortion, address(0));
 		require(now >= minActionTime[sender][sender], "wait more time");
 		stakerSplit[sender] = _newStakerPortion;
 		minActionTime[sender][sender] = now.add(timeLock);
@@ -74,7 +74,7 @@ contract CakeStaking is Global, ReentrancyGuard, GasStation, CakeToken {
     }
 
     function deposit(address _contentCreator, uint256 _amount) public nonReentrant {
-		address payable sender = _msgSender("deposit");
+		address payable sender = _msgSender("deposit", _contentCreator, _amount, address(0));
 		uint256 contractBalance = creatorStaked[_contentCreator];
 		_transfer(sender, address(this), _amount);
 
@@ -94,7 +94,7 @@ contract CakeStaking is Global, ReentrancyGuard, GasStation, CakeToken {
     }
 
     function withdraw(address _contentCreator, uint256 _userStake) public nonReentrant {
-		address payable sender = _msgSender("withdraw");
+		address payable sender = _msgSender("withdraw", _contentCreator, _userStake, address(0));
 		require(now >= minActionTime[sender][_contentCreator], "wait more time");
 		uint256 payout = withdrawPayout(_contentCreator, _userStake);
 		_transfer(address(this), sender, payout);

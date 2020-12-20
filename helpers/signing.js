@@ -1,13 +1,14 @@
 
 const addressId = "7F390Fb36033fb8d9731B105077976858Ca57668"
 
-const returnForwardRequest = async (ethers, signer, staking, functionName, nonce, request) => {
+const returnForwardRequest = async (ethers, signer, staking, functionName, nonce, request, params) => {
+  const {to, amount, from} = params
   const coder = new ethers.utils.AbiCoder();
   let message = coder.encode(
-    ["address", "uint256", "string"],
-    [staking.address, nonce, functionName]
+    ["address", "uint256", "string", "address", "uint256", "uint256"],
+    [staking.address, nonce, functionName, to, amount, from]
   );
-
+  console.log(ethers.utils.arrayify(message).length)
   const messageHash = ethers.utils.keccak256(message);
   const messageHashBytes = ethers.utils.arrayify(messageHash);
   let signedMessage = await signer.signMessage(messageHashBytes);

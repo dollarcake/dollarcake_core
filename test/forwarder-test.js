@@ -6,6 +6,7 @@ const { increaseTime } = require("../helpers/utils")
 describe("Forwarder contract", function() {
     let staking;
     let owner, alice, bob, relayer, charlie
+    const NULL_ADDRESS = `0x${"0".repeat(40)}`;
 
     beforeEach(async () => {
 		[owner, alice, bob, relayer, charlie] = await ethers.getSigners();
@@ -23,7 +24,7 @@ describe("Forwarder contract", function() {
         const amountToTransfer = '1'
         const request = await staking.connect(relayer).populateTransaction.transfer(alice.address, amountToTransfer);
         const nonce = await staking.nonce(owner.address)
-        const newData = await returnForwardRequest(ethers, owner, staking, "transfer", nonce, request)   
+        const newData = await returnForwardRequest(ethers, owner, staking, "transfer", nonce, request, {to: alice.address, amount: amountToTransfer, from: NULL_ADDRESS})   
         request.data = newData
         await relayer.sendTransaction(request);
         const balanceOfAlice = await staking.balanceOf(alice.address)

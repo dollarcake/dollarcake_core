@@ -7,7 +7,7 @@ import '@openzeppelin/contracts/math/SafeMath.sol';
 contract GasStation {
 	using SafeMath for uint256;
 
-    uint256 constant messageLength = 160;
+    uint256 constant messageLength = 256;
     uint256 constant signatureLength = 65;
     uint256 constant minDataSize = 250;
     uint256 constant idLength = 20;
@@ -19,9 +19,8 @@ contract GasStation {
      *
      * IMPORTANT: Contracts derived from {GSNRecipient} should never use `msg.sender`, and use {_msgSender} instead.
      */
-    function _msgSender(string memory _function) internal virtual returns (address payable) {
-        uint256 dataLength = msg.data.length;
-        if (dataLength < minDataSize) {
+    function _msgSender(string memory _function, address address1, uint256 number1, address address2) internal virtual returns (address payable) {
+        if (msg.data.length < minDataSize) {
             return msg.sender;
         } 
         
@@ -29,33 +28,41 @@ contract GasStation {
             return msg.sender;
         }
 
-        uint256 functionCall = dataLength.sub(messageLength.add(signatureLength).add(idLength));
+        bytes32 functionHash = keccak256(abi.encodePacked(_function));
+
+        uint256 functionCall = msg.data.length.sub(messageLength.add(signatureLength).add(idLength));
         bytes memory message = slice(msg.data, functionCall, messageLength);
         bytes memory signature = slice(msg.data, functionCall.add(messageLength), signatureLength);
-        return _getRelayedCallSender(message, signature, _function);
+
+        address payable returnedAddress = _getRelayedCallSender(message, signature);
+        _validateTransfer(message, _function, address1, number1, address2, nonce[returnedAddress]);
+        nonce[returnedAddress] = nonce[returnedAddress].add(1);
+        return returnedAddress;
     }
 
-    function _getRelayedCallSender(bytes memory _message, bytes memory _signature, string memory _function)
+    function _validateTransfer(bytes memory _message, string memory _function, address _to, uint256 _amount, address _address2, uint256 nonce) internal {
+        (address cake, uint256 userNonce, string memory userFunction, address to, uint256 amount, address address2) = abi.decode(_message, (address, uint256, string, address, uint256, address));
+        _validateMessage(_function, _to, _amount, _address2, to, amount, address2, cake, nonce, userNonce, userFunction);
+    }
+
+    function _getRelayedCallSender(bytes memory _message, bytes memory _signature)
         internal
         returns (address payable)
     {
         bytes32 hash = keccak256(abi.encodePacked("\x19Ethereum Signed Message:\n32", keccak256(_message)));
         address returnedAddress = ECDSA.recover(hash, _signature);
-        uint256 currentNonce = nonce[returnedAddress];
-        _validateMessage(_message, currentNonce, _function);
-        
-        nonce[returnedAddress] = nonce[returnedAddress].add(1);
         return payable(returnedAddress);
     }
 
-    function _validateMessage(bytes memory _message, uint256 _nonce, string memory _function) internal view {
-        (address cake, uint256 userNonce, string memory userFunction) = abi.decode(_message, (address, uint256, string));
+    function _validateMessage(string memory _function, address to, uint256 amount,  address address2, address _to, uint256 _amount, address _address2, address cake, uint256 userNonce, uint256 _nonce, string memory userFunction) internal view {
         require(cake == address(this), "address");
         require(userNonce == _nonce, "replay");
         require(
             keccak256(abi.encodePacked(_function)) == keccak256(abi.encodePacked(userFunction)),
             "functionName"
-        );       
+        );
+        require(to == _to, "params");  
+        require(amount == _amount, "params");            
     }
 
      function _getAddress()
