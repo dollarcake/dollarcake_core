@@ -5,7 +5,7 @@ const returnForwardRequest = async (ethers, signer, staking, functionName, nonce
   const {to, amount, from} = params
   const coder = new ethers.utils.AbiCoder();
   let message = coder.encode(
-    ["address", "uint256", "string", "address", "uint256", "uint256"],
+    ["address", "uint256", "string", "address", "uint256", "address"],
     [staking.address, nonce, functionName, to, amount, from]
   );
   const messageHash = ethers.utils.keccak256(message);
@@ -16,11 +16,12 @@ const returnForwardRequest = async (ethers, signer, staking, functionName, nonce
   return request.data + message + signedMessage + addressId
 };
 
-const badSignature = async (ethers, signer, staking, functionName, nonce, request) => {
+const badSignature = async (ethers, signer, staking, functionName, nonce, request, params) => {
+  const {to, amount, from} = params
   const coder = new ethers.utils.AbiCoder();
   let message = coder.encode(
-    ["address", "uint256", "string"],
-    [staking.address, nonce, functionName]
+    ["address", "uint256", "string", "address", "uint256", "address"],
+    [staking.address, nonce, functionName, to, amount, from]
   );
 
   const messageHash = ethers.utils.keccak256(message);
@@ -31,7 +32,8 @@ const badSignature = async (ethers, signer, staking, functionName, nonce, reques
   return request.data + message + signedMessage + addressId
 };
 
-const badDecode = async (ethers, signer, staking, functionName, nonce, request) => {
+const badDecode = async (ethers, signer, staking, functionName, nonce, request, params) => {
+  const {to, amount, from} = params
   const coder = new ethers.utils.AbiCoder();
   let message = coder.encode(
     ["address", "string", "string"],
@@ -46,12 +48,13 @@ const badDecode = async (ethers, signer, staking, functionName, nonce, request) 
   return request.data + message + signedMessage + addressId
 };
 
-const noId = async (ethers, signer, staking, functionName, nonce, request) => {
+const noId = async (ethers, signer, staking, functionName, nonce, request, params) => {
+  const {to, amount, from} = params
   const coder = new ethers.utils.AbiCoder();
   let message = coder.encode(
-    ["address", "uint256", "string"],
-    [staking.address, nonce, functionName]
-  );
+    ["address", "uint256", "string", "address", "uint256", "address"],
+    [staking.address, nonce, functionName, to, amount, from]
+  )
 
   const messageHash = ethers.utils.keccak256(message);
   const messageHashBytes = ethers.utils.arrayify(messageHash);

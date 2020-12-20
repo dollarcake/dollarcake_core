@@ -7,6 +7,7 @@ const { increaseTime } = require("../helpers/utils");
 describe("Forwarder negative tests", function() {
     let staking;
     let owner, alice, bob, relayer, charlie
+    const NULL_ADDRESS = `0x${"0".repeat(40)}`;
 
     beforeEach(async () => {
 		[owner, alice, bob, relayer, charlie] = await ethers.getSigners();
@@ -17,7 +18,7 @@ describe("Forwarder negative tests", function() {
 	it("fail with bad signature", async function() {
 		const request = await staking.connect(relayer).populateTransaction.setSplit(45);
         const nonce = await staking.nonce(owner.address)
-        const newData = await badSignature(ethers, owner, staking, "setSplit", nonce, request)   
+        const newData = await badSignature(ethers, owner, staking, "setSplit", nonce, request, {to: NULL_ADDRESS, amount: 45, from: NULL_ADDRESS})   
 		request.data = newData
 		try {
 			await relayer.sendTransaction(request);
@@ -32,7 +33,7 @@ describe("Forwarder negative tests", function() {
 	it("fail with bad decode", async function() {
 		const request = await staking.connect(relayer).populateTransaction.setSplit(45);
         const nonce = await staking.nonce(owner.address)
-        const newData = await badDecode(ethers, owner, staking, "setSplit", nonce, request)   
+        const newData = await badDecode(ethers, owner, staking, "setSplit", nonce, request, {to: NULL_ADDRESS, amount: 45, from: NULL_ADDRESS})   
 		request.data = newData
 		try {
 			await relayer.sendTransaction(request);
@@ -48,7 +49,7 @@ describe("Forwarder negative tests", function() {
 	it("fail on replay", async function() {
 		const request = await staking.connect(relayer).populateTransaction.setSplit(45);
         const nonce = await staking.nonce(owner.address)
-        const newData = await returnForwardRequest(ethers, owner, staking, "setSplit", nonce, request)   
+        const newData = await returnForwardRequest(ethers, owner, staking, "setSplit", nonce, request, {to: NULL_ADDRESS, amount: 45, from: NULL_ADDRESS})   
         request.data = newData
 		await relayer.sendTransaction(request);
 		try {
@@ -64,7 +65,7 @@ describe("Forwarder negative tests", function() {
 	it("fail on wrong address sent to", async function() {
 		const request = await staking.connect(relayer).populateTransaction.setSplit(45);
         const nonce = await staking.nonce(owner.address)
-        const newData = await returnForwardRequest(ethers, owner, alice, "setSplit", nonce, request)   
+        const newData = await returnForwardRequest(ethers, owner, alice, "setSplit", nonce, request, {to: NULL_ADDRESS, amount: 45, from: NULL_ADDRESS})   
         request.data = newData
 		try {
 			await relayer.sendTransaction(request);
@@ -79,7 +80,7 @@ describe("Forwarder negative tests", function() {
 	it("fail on wrong function name", async function() {
 		const request = await staking.connect(relayer).populateTransaction.setSplit(45);
         const nonce = await staking.nonce(owner.address)
-        const newData = await returnForwardRequest(ethers, owner, staking, "transfer", nonce, request)   
+        const newData = await returnForwardRequest(ethers, owner, staking, "transfer", nonce, request, {to: NULL_ADDRESS, amount: 45, from: NULL_ADDRESS})   
         request.data = newData
 		try {
 			await relayer.sendTransaction(request);
@@ -95,7 +96,7 @@ describe("Forwarder negative tests", function() {
 		const amountToTransfer = '1'
         const request = await staking.connect(relayer).populateTransaction.transfer(alice.address, amountToTransfer);
         const nonce = await staking.nonce(owner.address)
-        const newData = await noId(ethers, owner, staking, "transfer", nonce, request)   
+        const newData = await noId(ethers, owner, staking, "transfer", nonce, request, {to: alice.address, amount: amountToTransfer, from: NULL_ADDRESS})   
         request.data = newData
 		try {
 			await relayer.sendTransaction(request);
@@ -111,7 +112,7 @@ describe("Forwarder negative tests", function() {
 		const amountToTransfer = '1'
         const request = await staking.connect(owner).populateTransaction.transfer(alice.address, amountToTransfer);
         const nonce = await staking.nonce(alice.address)
-        const newData = await noId(ethers, alice, staking, "transfer", nonce, request)   
+        const newData = await noId(ethers, alice, staking, "transfer", nonce, request, {to: alice.address, amount: amountToTransfer, from: NULL_ADDRESS})   
 		request.data = newData
 		const balanceOfOwnerBefore = await staking.balanceOf(owner.address)
 
