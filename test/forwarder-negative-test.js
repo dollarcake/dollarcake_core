@@ -124,4 +124,49 @@ describe("Forwarder negative tests", function() {
 		assert.equal(calculatedOwnerBalance, Number(balanceOfOwnerBefore), "owner should have one less")
 
 	})
+	it("fail on wrong param address1", async function() {
+		const request = await staking.connect(relayer).populateTransaction.deposit(alice.address, "100");
+        const nonce = await staking.nonce(owner.address)
+        const newData = await returnForwardRequest(ethers, owner, staking, "deposit", nonce, request, {to: bob.address, amount: "100", from: NULL_ADDRESS})   
+        request.data = newData
+		try {
+			await relayer.sendTransaction(request);
+			should.fail("The call should have failed but didn't")
+		} catch (e) {
+			assert.equal(
+				e.message, 
+				"VM Exception while processing transaction: revert params"
+			)			
+		}	
+	})
+	it("fail on wrong param number1", async function() {
+		const request = await staking.connect(relayer).populateTransaction.setSplit(45);
+        const nonce = await staking.nonce(owner.address)
+        const newData = await returnForwardRequest(ethers, owner, staking, "setSplit", nonce, request, {to: NULL_ADDRESS, amount: 55, from: NULL_ADDRESS})   
+        request.data = newData
+		try {
+			await relayer.sendTransaction(request);
+			should.fail("The call should have failed but didn't")
+		} catch (e) {
+			assert.equal(
+				e.message, 
+				"VM Exception while processing transaction: revert params"
+			)			
+		}	
+	})
+	it("fail on wrong param address2", async function() {
+		const request = await staking.connect(relayer).populateTransaction.transferFrom(alice.address, owner.address, "100");
+        const nonce = await staking.nonce(owner.address)
+        const newData = await returnForwardRequest(ethers, owner, staking, "transferFrom", nonce, request, {to: alice.address, amount: "100", from: alice.address})   
+        request.data = newData
+		try {
+			await relayer.sendTransaction(request);
+			should.fail("The call should have failed but didn't")
+		} catch (e) {
+			assert.equal(
+				e.message, 
+				"VM Exception while processing transaction: revert params"
+			)			
+		}	
+	})
 })
