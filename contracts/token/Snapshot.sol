@@ -161,7 +161,7 @@ abstract contract ERC20Snapshot is ERC20 {
     }
 
     function _updateAccountSnapshot(address account) private {
-        _updateSnapshot(_accountBalanceSnapshots[account], balanceOf(account));
+        _updateSnapshot(_accountBalanceSnapshots[account], balanceOf(account).add(deposited[account]));
     }
 
     function _updateTotalSupplySnapshot() private {

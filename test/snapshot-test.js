@@ -68,8 +68,8 @@ describe("staking contract", function() {
 
 	})
 
-    it('should include staked funds and on exit add the interest', async () => {
-		const aliceDeposit = 17.5 * 1e18
+    it.only('should include staked funds and on exit add the interest', async () => {
+		const aliceDeposit = 10 * 1e18
 		await staking.transfer(alice.address, aliceDeposit.toString())
 		const balanceOfAlice = await staking.balanceOf(alice.address)
 		await staking.connect(alice).deposit(charlie.address, aliceDeposit.toString())
@@ -78,14 +78,30 @@ describe("staking contract", function() {
 		assert.equal(balanceOfAlice.toString(), balanceOfAliceAt.toString(), "Alice should still have snapshot")
 		await staking.changeFee(1000)
 		await staking.reward([charlie.address], [aliceDeposit.toString()])
+		console.log({balanceOfAlice: balanceOfAlice.toString(), balanceOfAliceAt: balanceOfAliceAt.toString()})
 
 		await increaseTime(ethers)
 		await staking.connect(alice).withdraw(charlie.address, aliceDeposit.toString())
 		await staking.snapshot()
-		const balanceOfAliceAt2 = await staking.balanceOfAt(alice.address, "2")
 		const balanceOfAlice2 = await staking.balanceOf(alice.address)
-
+		const balanceOfAliceAt2 = await staking.balanceOfAt(alice.address, "2")
+		console.log({balanceOfAlice2: balanceOfAlice2.toString(), balanceOfAliceAt2: balanceOfAliceAt2.toString()})
 		assert.equal(balanceOfAliceAt2.toString(), balanceOfAlice2.toString(), "alice should have the same amount as snapshot")
+
+		await staking.connect(alice).deposit(charlie.address, aliceDeposit.toString())
+		const balanceOfAlice3 = await staking.balanceOf(alice.address)
+		const balanceOfAliceAt3 = await staking.balanceOfAt(alice.address, "2")
+		console.log({balanceOfAlice3: balanceOfAlice3.toString(), balanceOfAliceAt3: balanceOfAliceAt3.toString()})
+
+		assert.equal(balanceOfAliceAt3.toString(), balanceOfAlice2.toString(), "alice should have the same amount as snapshot")
+		await staking.snapshot()
+		await increaseTime(ethers)
+		await staking.connect(alice).withdraw(charlie.address, aliceDeposit.toString())
+		const balanceOfAlice4 = await staking.balanceOf(alice.address)
+		const balanceOfAliceAt4 = await staking.balanceOfAt(alice.address, "3")
+		console.log({balanceOfAliceAt4: balanceOfAliceAt4.toString(), balanceOfAlice2: balanceOfAlice2.toString()})
+		assert.equal(balanceOfAliceAt4.toString(), balanceOfAlice2.toString(), "alice should have the same amount as snapshot")
+
 	})
 
 	it('should include staked funds and on exit add the interest multiple stakers', async () => {
