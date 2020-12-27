@@ -47,6 +47,7 @@ abstract contract ERC20Snapshot is ERC20 {
     }
 
     mapping (address => Snapshots) private _accountBalanceSnapshots;
+    mapping (address =>  uint256) public deposited; // user to CC to amount
     Snapshots private _totalSupplySnapshots;
 
     // Snapshot ids increase monotonically, with the first value being 1. An id of 0 is invalid.
@@ -96,7 +97,7 @@ abstract contract ERC20Snapshot is ERC20 {
     function balanceOfAt(address account, uint256 snapshotId) public view returns (uint256) {
         (bool snapshotted, uint256 value) = _valueAt(snapshotId, _accountBalanceSnapshots[account]);
 
-        return snapshotted ? value : balanceOf(account);
+        return snapshotted ? value : balanceOf(account).add(deposited[account]);
     }
 
     /**

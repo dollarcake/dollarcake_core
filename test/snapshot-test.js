@@ -67,4 +67,29 @@ describe("staking contract", function() {
 		assert.equal(currentSnapshotAfter.toString(), "1")
 
 	})
+
+    it('should include staked funds and on exit add the interest', async () => {
+		const aliceDeposit = 17.5 * 1e18
+		await staking.transfer(alice.address, aliceDeposit.toString())
+		const balanceOfAlice = await staking.balanceOf(alice.address)
+		await staking.connect(alice).deposit(charlie.address, aliceDeposit.toString())
+		await staking.snapshot()
+		const balanceOfAliceAt = await staking.balanceOfAt(alice.address, "1")
+		assert.equal(balanceOfAlice.toString(), balanceOfAliceAt.toString(), "Alice should still have snapshot")
+		await staking.changeFee(1000)
+		await staking.reward([charlie.address], [aliceDeposit.toString()])
+
+		await increaseTime(ethers)
+		await staking.connect(alice).withdraw(charlie.address, aliceDeposit.toString())
+		await staking.snapshot()
+		const balanceOfAliceAt2 = await staking.balanceOfAt(alice.address, "2")
+		const balanceOfAlice2 = await staking.balanceOf(alice.address)
+
+		assert.equal(balanceOfAliceAt2.toString(), balanceOfAlice2.toString(), "alice should have the same amount as snapshot")
+	})
+
+	it('should include staked funds and on exit add the interest multiple stakers', async () => {
+
+	})
+
 })
