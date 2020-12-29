@@ -5,9 +5,9 @@ import "hardhat/console.sol";
 import "../token/CakeToken.sol";
 import "../control/Global.sol";
 import "../gasStation/GasStation.sol";
-import '@openzeppelin/contracts/token/ERC20/SafeERC20.sol';
-import '@openzeppelin/contracts/math/SafeMath.sol';
-import '@openzeppelin/contracts/utils/ReentrancyGuard.sol';
+import "../openzeppelin/token/ERC20/SafeERC20.sol";
+import "../openzeppelin/math/SafeMath.sol";
+import "../openzeppelin/utils/ReentrancyGuard.sol";
 
 contract CakeStaking is Global, ReentrancyGuard, GasStation, CakeToken {
 

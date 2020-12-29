@@ -11,3 +11,4 @@ abi
 coverage
 
 coverage.json
+.DS_store

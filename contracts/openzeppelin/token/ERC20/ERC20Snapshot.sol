@@ -2,9 +2,9 @@
 
 pragma solidity >=0.6.0 <0.8.0;
 
-import "../openzeppelin/math/SafeMath.sol";
-import "../openzeppelin/utils/Arrays.sol";
-import "../openzeppelin/utils/Counters.sol";
+import "../../math/SafeMath.sol";
+import "../../utils/Arrays.sol";
+import "../../utils/Counters.sol";
 import "./ERC20.sol";
 
 /**
@@ -47,7 +47,6 @@ abstract contract ERC20Snapshot is ERC20 {
     }
 
     mapping (address => Snapshots) private _accountBalanceSnapshots;
-    mapping (address =>  uint256) public deposited; // user to CC to amount
     Snapshots private _totalSupplySnapshots;
 
     // Snapshot ids increase monotonically, with the first value being 1. An id of 0 is invalid.
@@ -79,7 +78,7 @@ abstract contract ERC20Snapshot is ERC20 {
      * We haven't measured the actual numbers; if this is something you're interested in please reach out to us.
      * ====
      */
-    function snapshot() public virtual returns (uint256) {
+    function _snapshot() internal virtual returns (uint256) {
         _currentSnapshotId.increment();
 
         uint256 currentId = _currentSnapshotId.current();
@@ -87,17 +86,13 @@ abstract contract ERC20Snapshot is ERC20 {
         return currentId;
     }
 
-	function currentSnapshot() public view returns (uint256) {
-		return _currentSnapshotId.current();
-	}
-
     /**
      * @dev Retrieves the balance of `account` at the time `snapshotId` was created.
      */
     function balanceOfAt(address account, uint256 snapshotId) public view returns (uint256) {
         (bool snapshotted, uint256 value) = _valueAt(snapshotId, _accountBalanceSnapshots[account]);
 
-        return snapshotted ? value : balanceOf(account).add(deposited[account]);
+        return snapshotted ? value : balanceOf(account);
     }
 
     /**
@@ -161,7 +156,7 @@ abstract contract ERC20Snapshot is ERC20 {
     }
 
     function _updateAccountSnapshot(address account) private {
-        _updateSnapshot(_accountBalanceSnapshots[account], balanceOf(account).add(deposited[account]));
+        _updateSnapshot(_accountBalanceSnapshots[account], balanceOf(account));
     }
 
     function _updateTotalSupplySnapshot() private {

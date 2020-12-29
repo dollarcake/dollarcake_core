@@ -55,7 +55,7 @@ npx hardhat run scripts/deploy-script.js
 
 [] XDAI bridge
 
-[] No Npm packages
+[x] No Npm packages
 
 [x] Solutionize best way to get user earned per reward payout
 
