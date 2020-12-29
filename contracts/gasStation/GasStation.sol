@@ -2,8 +2,8 @@
 pragma solidity ^0.6.0;
 
 import "hardhat/console.sol";
-import '@openzeppelin/contracts/cryptography/ECDSA.sol';
-import '@openzeppelin/contracts/math/SafeMath.sol';
+import "../openzeppelin/cryptography/ECDSA.sol";
+import "../openzeppelin/math/SafeMath.sol";
 contract GasStation {
 	using SafeMath for uint256;
 

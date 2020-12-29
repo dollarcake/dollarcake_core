@@ -2,7 +2,7 @@
 pragma solidity ^0.6.0;
 
 import "hardhat/console.sol";
-import '@openzeppelin/contracts/access/Ownable.sol';
+import "../openzeppelin/access/Ownable.sol";
 
 
 contract Global is Ownable {
