@@ -77,6 +77,7 @@ contract CakeStaking is Global, ReentrancyGuard, GasStation, CakeToken {
 		address payable sender = _msgSender("deposit", _contentCreator, _amount, address(0));
 		uint256 contractBalance = creatorStaked[_contentCreator];
 		_transfer(sender, address(this), _amount);
+		deposited[sender] = deposited[sender].add(_amount);
 
 		uint256 payout;
 		if (contentTotalPayout[_contentCreator] == 0) {
@@ -98,6 +99,7 @@ contract CakeStaking is Global, ReentrancyGuard, GasStation, CakeToken {
 		require(now >= minActionTime[sender][_contentCreator], "wait more time");
 		uint256 payout = withdrawPayout(_contentCreator, _userStake);
 		_transfer(address(this), sender, payout);
+		deposited[sender] = payout > deposited[sender] ? 0 : deposited[sender].sub(payout);
 		userStake[_contentCreator][sender] = userStake[_contentCreator][sender].sub(_userStake);
 		creatorStaked[_contentCreator] = creatorStaked[_contentCreator].sub(payout);
 		contentTotalPayout[_contentCreator] = contentTotalPayout[_contentCreator].sub(_userStake);

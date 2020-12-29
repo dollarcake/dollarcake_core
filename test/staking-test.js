@@ -48,8 +48,8 @@ describe("staking contract", function() {
 		assert.equal(cakeAddressBalance.toString(), calculatedCakeAddressBalance.toString(), "cake address should have got rewarded")
 	})
 	it("should load test the reward function", async function() {
-		const receivers = Array(200).fill(alice.address)
-		const amountToSend = Array(200).fill("1000000000000000000")
+		const receivers = Array(170).fill(alice.address)
+		const amountToSend = Array(170).fill("1000000000000000000")
 		await staking.reward(receivers, amountToSend)
 	})
 	it("should fail to reward mismatch", async function() {
