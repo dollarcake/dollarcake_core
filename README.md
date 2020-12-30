@@ -81,7 +81,7 @@ npx hardhat run scripts/deploy-script.js
 
 [] add auditing tools
 
-[] documentation
+[] documentation 
 
 ## Deployed 
 * cake contract address 0x42e79852A5f6338611ADD086EA58427138022604
