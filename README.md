@@ -52,9 +52,6 @@ npx hardhat run scripts/deploy-script.js
 
 [x] GSN network negative tests
 
-
-[] XDAI bridge
-
 [x] No Npm packages
 
 [x] Solutionize best way to get user earned per reward payout
@@ -76,14 +73,18 @@ npx hardhat run scripts/deploy-script.js
 
 [x] snapshot token
 
-[] handle being able to track tokens inside the contract and wallet
+[x] handle being able to track tokens inside the contract and wallet
 
 [x] cpm fee 0-7% globally contrallable 
 
 [x] add params to gas station check
 
+[] add auditing tools
+
+[] documentation 
+
 ## Deployed 
-* cake contract address 0x05951564A17A2f7b61723062FC5219816920756B
+* cake contract address 0x42e79852A5f6338611ADD086EA58427138022604
 
 
 
