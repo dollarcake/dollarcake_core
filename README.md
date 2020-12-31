@@ -84,7 +84,15 @@ npx hardhat run scripts/deploy-script.js
 [] documentation 
 
 ## Deployed 
+Kovan
 * cake contract address 0x42e79852A5f6338611ADD086EA58427138022604
+
+Sokol
+* cake contract address 0x250147E50698d2B43Ebd4d9e53ecB0dB50552745
+
+* blockexplorer https://blockscout.com/poa/sokol/
+
+* faucet https://faucet.poa.network/
 
 
 
