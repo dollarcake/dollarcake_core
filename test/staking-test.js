@@ -208,6 +208,17 @@ describe("staking contract", function() {
 		await increaseTime(ethers)
 		await expect(staking.connect(alice).withdraw(charlie.address, aliceDeposit.toString())).to.emit(staking, "UserWithdrawal").withArgs(alice.address, charlie.address, aliceDeposit.toString(), aliceDeposit.toString())
 		await staking.connect(bob).withdraw(charlie.address, bobStake)
+		
+		try {
+			// try to withdraw more than you have
+			await staking.connect(alice).withdraw(charlie.address, 10)
+			should.fail("The call should have failed but didn't")
+		} catch(e) {
+			assert.equal(
+				e.message, 
+				"VM Exception while processing transaction: revert SafeMath: division by zero"
+			)
+		}
 
 		const aliceStakeAfter = await staking.userStake(charlie.address, alice.address)
 		const balanceOfAliceAfter = await staking.balanceOf(alice.address)
