@@ -135,5 +135,17 @@ describe("staking contract", function() {
 		const balanceOfAliceAt4 = await staking.balanceOfAt(alice.address, "3")
 		assert.equal(balanceOfAliceAt4.toString(), balanceOfAlice2.toString(), "alice should have the same amount as snapshot")
 	})
+	it('should fail snapshot from non owner', async () => {
+		try {
+			await staking.connect(alice).snapshot()
+			should.fail("The call should have failed but didn't")
+		} catch(e) {
+			assert.equal(
+				e.message, 
+				"VM Exception while processing transaction: revert Ownable: caller is not the owner"
+			)
+
+		}
+	})
 
 })

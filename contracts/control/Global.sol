@@ -13,6 +13,7 @@ contract Global is Ownable {
 	uint256 public fee;
 	address public dollarCake;
 	bool public isControlingSplit;
+	uint256 public relayerFee;
 
 	constructor () public {
 		isControlingSplit = true;
@@ -48,6 +49,11 @@ contract Global is Ownable {
 
 	function changeDollarCakeAddress(address _dollarCake) external onlyOwner {
 		dollarCake = _dollarCake;
+	}
+
+	function changeRelayerFee(uint256 _relayerFee) external onlyOwner {
+		require(_relayerFee <= 20 ether, "not in bounds");
+		relayerFee = _relayerFee;
 	}
 
 }

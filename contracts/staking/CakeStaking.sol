@@ -3,13 +3,12 @@ pragma solidity ^0.6.0;
 
 import "hardhat/console.sol";
 import "../token/CakeToken.sol";
-import "../control/Global.sol";
 import "../gasStation/GasStation.sol";
 import "../openzeppelin/token/ERC20/SafeERC20.sol";
 import "../openzeppelin/math/SafeMath.sol";
 import "../openzeppelin/utils/ReentrancyGuard.sol";
 
-contract CakeStaking is Global, ReentrancyGuard, GasStation, CakeToken {
+contract CakeStaking is ReentrancyGuard, CakeToken {
 
 	using SafeMath for uint256;
 
@@ -25,7 +24,7 @@ contract CakeStaking is Global, ReentrancyGuard, GasStation, CakeToken {
 	event UserDeposit(address indexed user, address indexed contentCreator, uint256 amountDespoited, uint256 payout);
 	event UserWithdrawal(address indexed user, address indexed contentCreator, uint256 payout, uint256 amountRecieved);
 
-    constructor(string memory _name, string memory _symbol) public GasStation() CakeToken(_name, _symbol) {
+    constructor(string memory _name, string memory _symbol) public CakeToken(_name, _symbol) {
     }
 
 	function _msgSender(string memory _function, address address1, uint256 number1, address address2) internal override(GasStation) returns (address payable) {
