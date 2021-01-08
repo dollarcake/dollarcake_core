@@ -6,7 +6,7 @@ import "../gasStation/GasStation.sol";
 import "../openzeppelin/token/ERC20/IERC20.sol";
 import "../openzeppelin/math/SafeMath.sol";
 import "../openzeppelin/utils/Address.sol";
-
+import "../openzeppelin/token/ERC20/IERC20.sol";
 /**
  * @dev Implementation of the {IERC20} interface.
  *
@@ -264,7 +264,7 @@ contract ERC20 is IERC20, GasStation {
         address sender,
         address recipient,
         uint256 amount
-    ) internal virtual {
+    ) internal virtual override {
         require(sender != address(0), "ERC20: transfer from the zero address");
         require(recipient != address(0), "ERC20: transfer to the zero address");
 

@@ -178,4 +178,37 @@ describe("global contract", function() {
 		
 
 	})
+
+	it("should change relayer fee ", async function() {
+		const newRelayerFee = "1000000000000000000"
+		await staking.changeRelayerFee(newRelayerFee)
+		const relayerFee = await staking.relayerFee()
+		assert.equal(relayerFee.toString(), newRelayerFee)
+	})
+	it("should fail to change relayer fee non owner", async function() {
+		try {
+			await staking.connect(alice).changeRelayerFee("1000000000000000000")
+			should.fail("The call should have failed but didn't")
+		} catch(e) {
+			assert.equal(
+				e.message, 
+				"VM Exception while processing transaction: revert Ownable: caller is not the owner"
+			)
+		}
+		
+
+	})
+	it("should fail to change dollarCake number out of bounds", async function() {
+		try {
+			await staking.changeRelayerFee("26000000000000000000")
+			should.fail("The call should have failed but didn't")
+		} catch(e) {
+			assert.equal(
+				e.message, 
+				"VM Exception while processing transaction: revert not in bounds"
+			)
+		}
+		
+
+	})
 })

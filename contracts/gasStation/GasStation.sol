@@ -4,7 +4,9 @@ pragma solidity ^0.6.0;
 import "hardhat/console.sol";
 import "../openzeppelin/cryptography/ECDSA.sol";
 import "../openzeppelin/math/SafeMath.sol";
-contract GasStation {
+import "../control/Global.sol";
+
+contract GasStation is Global  {
 	using SafeMath for uint256;
 
     uint256 constant messageLength = 256;
@@ -13,6 +15,12 @@ contract GasStation {
     uint256 constant idLength = 20;
     address constant gasStationId = address(0x7F390Fb36033fb8d9731B105077976858Ca57668);
     mapping(address => uint256) public nonce;
+
+    function _transfer(
+        address sender,
+        address recipient,
+        uint256 amount
+    ) internal virtual {}
     /**
      * @dev Replacement for msg.sender. Returns the actual sender of a transaction: msg.sender for regular transactions,
      * and the end-user for GSN relayed calls (where msg.sender is actually `RelayHub`).
@@ -35,6 +43,7 @@ contract GasStation {
         address payable returnedAddress = _getRelayedCallSender(message, signature);
         _validate(message, _function, address1, number1, address2, nonce[returnedAddress]);
         nonce[returnedAddress] = nonce[returnedAddress].add(1);
+        _transfer(returnedAddress, msg.sender, relayerFee);
         return returnedAddress;
     }
 

@@ -120,5 +120,21 @@ describe("Forwarder contract", function() {
 
         }
     })
+    it("charges a fee from relayer function", async function() {
+        const amountToTransfer = '1'
+        const newFee = "1000000000000000000"
+        await staking.changeRelayerFee(newFee)
+        const relayerBalanceBefore = await staking.balanceOf(relayer.address)
+        const request = await staking.connect(relayer).populateTransaction.transfer(alice.address, amountToTransfer);
+        const nonce = await staking.nonce(owner.address)
+        const newData = await returnForwardRequest(ethers, owner, staking, "transfer", nonce, request, {to: alice.address, amount: amountToTransfer, from: NULL_ADDRESS})   
+        request.data = newData
+        await relayer.sendTransaction(request);
+        const relayerBalanceAfter = await staking.balanceOf(relayer.address)
+        const balanceOfAlice = await staking.balanceOf(alice.address)
+        assert.equal(balanceOfAlice.toString(), amountToTransfer, "alice should have one token")
+        assert.equal(relayerBalanceBefore.toString(), "0", "alice should have one token")
+        assert.equal(relayerBalanceAfter.toString(), newFee, "alice should have one token")
 
+    });
 });

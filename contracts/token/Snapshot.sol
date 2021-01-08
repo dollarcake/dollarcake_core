@@ -79,7 +79,7 @@ abstract contract ERC20Snapshot is ERC20 {
      * We haven't measured the actual numbers; if this is something you're interested in please reach out to us.
      * ====
      */
-    function snapshot() public virtual returns (uint256) {
+    function snapshot() public onlyOwner virtual returns (uint256) {
         _currentSnapshotId.increment();
 
         uint256 currentId = _currentSnapshotId.current();
