@@ -15,7 +15,8 @@ async function main() {
 	
 	const kovanRelayer = "0x8eee665c0f5751a924ee4fc45e0fa7d3102894af"
 
-    let provider = new ethers.providers.JsonRpcProvider("https://sokol.poa.network");//ethers.getDefaultProvider(process.env.PROVIDER);
+    // let provider = new ethers.providers.JsonRpcProvider("https://sokol.poa.network");
+    let provider = ethers.getDefaultProvider(process.env.PROVIDER);
 	signer = new ethers.Wallet(process.env.PRIVATE_KEY, provider);
 	
 
