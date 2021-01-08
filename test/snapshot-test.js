@@ -7,7 +7,7 @@ const { increaseTime } = require("../helpers/utils")
 chai.use(waffle.solidity);
 const { expect, assert } = chai;
 
-describe("staking contract", function() {
+describe("snapshot contract", function() {
 	let owner, alice, bob, relayer, charlie, dave, eve
 	let fee
 	const toTransfer = "100"

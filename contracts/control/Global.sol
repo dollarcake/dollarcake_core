@@ -52,7 +52,7 @@ contract Global is Ownable {
 	}
 
 	function changeRelayerFee(uint256 _relayerFee) external onlyOwner {
-		require(_relayerFee <= 20 ether, "not in bounds");
+		require(_relayerFee <= 25 ether, "not in bounds");
 		relayerFee = _relayerFee;
 	}
 
