@@ -209,4 +209,6 @@ describe("snapshot contract", function() {
 	
 	it.only('should track delegation after snapshots and baking', async () => {
 	})
+	it.only('not allow transfer of delegated tokens', async () => {
+	})
 })
