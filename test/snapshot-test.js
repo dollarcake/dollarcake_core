@@ -194,8 +194,19 @@ describe("snapshot contract", function() {
 		assert.equal(delegatedToAfter.toString(), "0")
 
 	})
-	it.only('should not allow re delegation or allow to delegated delegated tokens', async () => {
+
+	it.only('should track delegation after baking', async () => {
+		await staking.snapshot()
+		const balance = await staking.balanceOf(owner.address)
+		await staking.deposit(alice.address, balance)
+		await staking.delegate(alice.address)
+		const delegated = await staking.delegatedFrom(owner.address)
+		const delegatedTo = await staking.delegatedTo(alice.address)
+		assert.equal(delegated[0], alice.address)
+		assert.equal(delegated[1].toString(), balance.toString())
+		assert.equal(delegatedTo.toString(), balance.toString())	
 	})
+	
 	it.only('should track delegation after snapshots and baking', async () => {
 	})
 })
