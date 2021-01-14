@@ -35,12 +35,17 @@ contract ERC20 is IERC20, GasStation {
     using SafeMath for uint256;
     using Address for address;
 
+    struct DelegatedInfo {
+        address delegatedTo;
+        uint256 amount;
+    }
+
     mapping(address => uint256) private _balances;
 
     mapping(address => mapping(address => uint256)) private _allowances;
     mapping(address => uint256) public delegatedTo;
-    mapping(address => uint256) public delegatedFrom;
-
+    mapping(address => DelegatedInfo) public delegatedFrom;
+    
     uint256 private _totalSupply;
 
     string private _name;
@@ -272,7 +277,7 @@ contract ERC20 is IERC20, GasStation {
 
         _beforeTokenTransfer(sender, recipient, amount);
         if (sender != address(this) || recipient != address(this)) {
-            require(amount <=  _balances[sender].sub(delegatedFrom[sender]), "ERC20: transfer amount exceeds balance");
+            require(amount <=  _balances[sender].sub(delegatedFrom[sender].amount), "ERC20: transfer amount exceeds balance");
         }
         _balances[sender] = _balances[sender].sub(
             amount,

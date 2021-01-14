@@ -97,7 +97,7 @@ abstract contract ERC20Snapshot is ERC20 {
     function balanceOfAt(address account, uint256 snapshotId) public view returns (uint256) {
         (bool snapshotted, uint256 value) = _valueAt(snapshotId, _accountBalanceSnapshots[account]);
 
-        return snapshotted ? value : balanceOf(account).add(deposited[account]).add(delegatedTo[account]).sub(delegatedFrom[account]);
+        return snapshotted ? value : balanceOf(account).add(deposited[account]).add(delegatedTo[account]).sub(delegatedFrom[account].amount);
     }
 
     /**
@@ -161,7 +161,7 @@ abstract contract ERC20Snapshot is ERC20 {
     }
 
     function _updateAccountSnapshot(address account) private {
-        _updateSnapshot(_accountBalanceSnapshots[account], balanceOf(account).add(deposited[account]).add(delegatedTo[account]).sub(delegatedFrom[account]));
+        _updateSnapshot(_accountBalanceSnapshots[account], balanceOf(account).add(deposited[account]).add(delegatedTo[account]).sub(delegatedFrom[account].amount));
     }
 
     function _updateTotalSupplySnapshot() private {
@@ -182,5 +182,22 @@ abstract contract ERC20Snapshot is ERC20 {
         } else {
             return ids[ids.length - 1];
         }
+    }
+
+    function delegate(address delegateTo) public {
+        address payable sender = _msgSender("delegate", delegateTo, 0, address(0));
+        uint256 userBalance = balanceOfAt(sender, currentSnapshot()).sub(delegatedTo[sender]); 
+        require(delegatedFrom[sender].amount == 0, "already delegated");
+        delegatedFrom[sender].amount = userBalance;
+        delegatedFrom[sender].delegatedTo = delegateTo;
+        delegatedTo[delegateTo] = delegatedTo[delegateTo].add(userBalance);
+    }
+
+    function undelegate() public {
+        address payable sender = _msgSender("undelegate", address(0), 0, address(0));
+        uint256 userDelegated = delegatedFrom[sender].amount; 
+        address undelegateFrom = delegatedFrom[sender].delegatedTo;
+        delegatedTo[undelegateFrom] = delegatedTo[undelegateFrom].sub(userDelegated);
+        delete delegatedFrom[sender];
     }
 }

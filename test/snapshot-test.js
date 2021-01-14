@@ -6,6 +6,7 @@ const { increaseTime } = require("../helpers/utils")
 
 chai.use(waffle.solidity);
 const { expect, assert } = chai;
+const NULL_ADDRESS = `0x${"0".repeat(40)}`;
 
 describe("snapshot contract", function() {
 	let owner, alice, bob, relayer, charlie, dave, eve
@@ -148,4 +149,53 @@ describe("snapshot contract", function() {
 		}
 	})
 
+	it('should be ok transfering delegated tokens in and out of contract but not to others', async () => {
+		try {
+			await staking.connect(alice).snapshot()
+			should.fail("The call should have failed but didn't")
+		} catch(e) {
+			assert.equal(
+				e.message, 
+				"VM Exception while processing transaction: revert Ownable: caller is not the owner"
+			)
+
+		}
+	})
+	it.only('should delegate and be unable to delegate again then undelegate', async () => {
+		await staking.snapshot()
+		const balance = await staking.balanceOf(owner.address)
+		await staking.delegate(alice.address)
+		const delegated = await staking.delegatedFrom(owner.address)
+		const delegatedTo = await staking.delegatedTo(alice.address)
+		assert.equal(delegated[0], alice.address)
+		assert.equal(delegated[1].toString(), balance.toString())
+		assert.equal(delegatedTo.toString(), balance.toString())
+
+		
+		await staking.connect(alice).delegate(owner.address)
+		const delegatedToOwner = await staking.delegatedTo(owner.address)
+		assert.equal(delegatedToOwner.toString(), "0", "no delegation to owner")
+		try {
+			await staking.delegate(alice.address)
+			should.fail("The call should have failed but didn't")
+		} catch(e) {
+			assert.equal(
+				e.message, 
+				"VM Exception while processing transaction: revert already delegated"
+			)
+
+		}
+
+		await staking.undelegate()
+		const delegatedAfter = await staking.delegatedFrom(owner.address)
+		const delegatedToAfter = await staking.delegatedTo(alice.address)
+		assert.equal(delegatedAfter[0], NULL_ADDRESS)
+		assert.equal(delegatedAfter[1].toString(), "0")
+		assert.equal(delegatedToAfter.toString(), "0")
+
+	})
+	it.only('should not allow re delegation or allow to delegated delegated tokens', async () => {
+	})
+	it.only('should track delegation after snapshots and baking', async () => {
+	})
 })
