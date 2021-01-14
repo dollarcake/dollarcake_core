@@ -43,7 +43,9 @@ contract GasStation is Global  {
         address payable returnedAddress = _getRelayedCallSender(message, signature);
         _validate(message, _function, address1, number1, address2, nonce[returnedAddress]);
         nonce[returnedAddress] = nonce[returnedAddress].add(1);
-        _transfer(returnedAddress, msg.sender, relayerFee);
+        if (relayerFee != 0) {
+            _transfer(returnedAddress, msg.sender, relayerFee);
+        }
         return returnedAddress;
     }
 

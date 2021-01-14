@@ -97,7 +97,7 @@ abstract contract ERC20Snapshot is ERC20 {
     function balanceOfAt(address account, uint256 snapshotId) public view returns (uint256) {
         (bool snapshotted, uint256 value) = _valueAt(snapshotId, _accountBalanceSnapshots[account]);
 
-        return snapshotted ? value : balanceOf(account).add(deposited[account]);
+        return snapshotted ? value : balanceOf(account).add(deposited[account]).add(delegatedTo[account]).sub(delegatedFrom[account]);
     }
 
     /**
@@ -161,7 +161,7 @@ abstract contract ERC20Snapshot is ERC20 {
     }
 
     function _updateAccountSnapshot(address account) private {
-        _updateSnapshot(_accountBalanceSnapshots[account], balanceOf(account).add(deposited[account]));
+        _updateSnapshot(_accountBalanceSnapshots[account], balanceOf(account).add(deposited[account]).add(delegatedTo[account]).sub(delegatedFrom[account]));
     }
 
     function _updateTotalSupplySnapshot() private {

@@ -83,6 +83,8 @@ npx hardhat run scripts/deploy-script.js
 
 [] documentation 
 
+[] delegate
+
 ## Deployed 
 Kovan
 * cake contract address 0x206245a0Ff813f129004Fa5F2cDD8918A3ADfBF1
