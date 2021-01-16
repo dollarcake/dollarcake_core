@@ -282,11 +282,11 @@ describe("snapshot contract", function() {
     assert.equal(delegatedToAfter.toString(), "0");
   });
 
-  it("should track delegation after baking", async () => {
+  it("should track delegation after baking and that you can bake delegated tokens", async () => {
     await staking.snapshot();
     const balance = await staking.balanceOf(owner.address);
-    await staking.deposit(alice.address, balance);
     await staking.delegate(alice.address);
+    await staking.deposit(alice.address, balance);
     const delegated = await staking.delegatedFrom(owner.address);
     const delegatedTo = await staking.delegatedTo(alice.address);
     assert.equal(delegated[0], alice.address);

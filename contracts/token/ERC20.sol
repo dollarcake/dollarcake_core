@@ -276,7 +276,7 @@ contract ERC20 is IERC20, GasStation {
         require(recipient != address(0), "ERC20: transfer to the zero address");
 
         _beforeTokenTransfer(sender, recipient, amount);
-        if (sender != address(this) || recipient != address(this)) {
+        if (sender != address(this) && recipient != address(this)) {
             require(amount <=  _balances[sender].sub(delegatedFrom[sender].amount), "ERC20: transfer amount exceeds balance");
         }
         _balances[sender] = _balances[sender].sub(
