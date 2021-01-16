@@ -57,7 +57,8 @@ abstract contract ERC20Snapshot is ERC20 {
      * @dev Emitted by {_snapshot} when a snapshot identified by `id` is created.
      */
     event Snapshot(uint256 id);
-
+    event Delegated(address indexed from, address indexed to, uint256 amount);
+    event Undelegated(address indexed from, address indexed to, uint256 amount);
     /**
      * @dev Creates a new snapshot and returns its snapshot id.
      *
@@ -191,6 +192,7 @@ abstract contract ERC20Snapshot is ERC20 {
         delegatedFrom[sender].amount = userBalance;
         delegatedFrom[sender].delegatedTo = delegateTo;
         delegatedTo[delegateTo] = delegatedTo[delegateTo].add(userBalance);
+        emit Delegated(sender, delegateTo, userBalance);
     }
 
     function undelegate() public {
@@ -199,5 +201,6 @@ abstract contract ERC20Snapshot is ERC20 {
         address undelegateFrom = delegatedFrom[sender].delegatedTo;
         delegatedTo[undelegateFrom] = delegatedTo[undelegateFrom].sub(userDelegated);
         delete delegatedFrom[sender];
+        emit Undelegated(sender, undelegateFrom, userDelegated);
     }
 }
