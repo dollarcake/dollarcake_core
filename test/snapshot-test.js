@@ -285,8 +285,8 @@ describe("snapshot contract", function() {
   it("should track delegation after baking and that you can bake delegated tokens", async () => {
     await staking.snapshot();
     const balance = await staking.balanceOf(owner.address);
-    await staking.delegate(alice.address);
     await staking.deposit(alice.address, balance);
+    await staking.delegate(alice.address);
     const delegated = await staking.delegatedFrom(owner.address);
     const delegatedTo = await staking.delegatedTo(alice.address);
     assert.equal(delegated[0], alice.address);
