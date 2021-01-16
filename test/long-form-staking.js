@@ -124,4 +124,17 @@ describe("long form staking contract", function() {
 		assert.equal(daveStakeAfter.toString(), "0", "dave should have no stake")
 		assert.closeTo(Number(balanceOfDaveAfter), Number(daveDeposit), 1,"dave should have original amount of tokens")
 	})
+	it("should deposit 10 leave 1 wei and then not screw up math", async function() {
+		const deposit = 10 * 1e18
+		const deposit2 = ethers.BigNumber.from("1000000000000000000000")
+		await staking.transfer(alice.address, deposit.toString())
+		await staking.connect(alice).deposit(charlie.address, deposit.toString())
+		await increaseTime(ethers)
+		await staking.connect(alice).withdraw(charlie.address, (deposit - 10000).toString())
+		const creatorStake = await staking.creatorStaked(charlie.address)
+		await staking.transfer(alice.address, deposit2)
+		await staking.connect(alice).deposit(charlie.address, (deposit2.sub(ethers.BigNumber.from("10000"))))
+		const aliceStake = await staking.userStake(charlie.address, alice.address)
+		assert.equal(aliceStake.toString(), deposit2.toString())
+	})
 })

@@ -15,8 +15,8 @@ async function main() {
 	
 	const kovanRelayer = "0x8eee665c0f5751a924ee4fc45e0fa7d3102894af"
 
-    // let provider = new ethers.providers.JsonRpcProvider("https://sokol.poa.network");
-    let provider = ethers.getDefaultProvider(process.env.PROVIDER);
+    let provider = new ethers.providers.JsonRpcProvider("https://sokol.poa.network");
+    // let provider = ethers.getDefaultProvider(process.env.PROVIDER);
 	signer = new ethers.Wallet(process.env.PRIVATE_KEY, provider);
 	
 
@@ -27,6 +27,9 @@ async function main() {
 
     // transfers all tokens and ownership to new address
     const mainAddress = "0x3fD861afc57b2A3E0BCcbD39cFB4F3D88E798D42"
+    const tx = await contract.snapshot()
+    console.log("first snapshot", tx)
+    await provider.waitForTransaction(tx.hash)
     const tx1 = await contract.changeDollarCakeAddress(mainAddress)
     console.log("fee address changed", tx1)
     await provider.waitForTransaction(tx1.hash)
