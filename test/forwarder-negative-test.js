@@ -41,7 +41,7 @@ describe("Forwarder negative tests", function() {
 		} catch(e) {
 			assert.equal(
 				e.message, 
-				"Transaction reverted for an unrecognized reason. Please report this to help us improve Hardhat."
+				"Transaction reverted without a reason"
 			)
 		}
 	})

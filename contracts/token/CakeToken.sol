@@ -1,5 +1,5 @@
 //SPDX-License-Identifier: Unlicense
-pragma solidity ^0.6.0;
+pragma solidity ^0.6.11;
 
 import "hardhat/console.sol";
 import "../gasStation/GasStation.sol";
