@@ -382,10 +382,35 @@ describe("snapshot contract", function() {
     } catch (e) {
       assert.equal(
         e.message,
-        "VM Exception while processing transaction: revert ERC20: transfer amount exceeds balance"
+        "VM Exception while processing transaction: revert ERC20: transfer delegated tokens"
       );
     }
     await staking.undelegate();
     await staking.transfer(alice.address, toTransfer);
+  });
+  it("should allow baking of delegated tokens but not rewarding", async () => {
+    await staking.snapshot();
+    const balance = await staking.balanceOf(owner.address);
+    await staking.delegate(alice.address);	
+	try {
+		await staking.reward([alice.address], ["1"])
+		should.fail("The call should have failed but didn't");
+	  } catch (e) {
+		assert.equal(
+		  e.message,
+		  "VM Exception while processing transaction: revert ERC20: reward from a delegated account"
+		);
+	  }
+
+	  try {
+		await staking.rewardStakingPoolOnly([alice.address], ["1"]);
+		should.fail("The call should have failed but didn't");
+	  } catch (e) {
+		assert.equal(
+		  e.message,
+		  "VM Exception while processing transaction: revert ERC20: reward from a delegated account"
+		);
+	  }
+	  await staking.deposit(alice.address, balance);
   });
 });

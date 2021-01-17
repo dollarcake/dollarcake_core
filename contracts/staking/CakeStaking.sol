@@ -24,6 +24,12 @@ contract CakeStaking is ReentrancyGuard, CakeToken {
 	event UserDeposit(address indexed user, address indexed contentCreator, uint256 amountDespoited, uint256 payout);
 	event UserWithdrawal(address indexed user, address indexed contentCreator, uint256 payout, uint256 amountRecieved);
 
+	modifier rewardModifier(address[] memory _contentCreator, uint256[] memory _amount) {
+		require(_contentCreator.length == _amount.length, "mismatch");
+		require(delegatedFrom[msg.sender].amount == 0, "ERC20: reward from a delegated account");
+		_;
+	}
+
     constructor(string memory _name, string memory _symbol) public CakeToken(_name, _symbol) {
     }
 
@@ -32,8 +38,7 @@ contract CakeStaking is ReentrancyGuard, CakeToken {
 	}
 
 
-    function reward(address[] memory _contentCreator, uint256[] memory _amount) public nonReentrant {
-		require(_contentCreator.length == _amount.length, "mismatch");
+    function reward(address[] memory _contentCreator, uint256[] memory _amount) public nonReentrant rewardModifier(_contentCreator, _amount) {
 		for (uint256 i = 0; i < _contentCreator.length; i++) { 
 			uint256 _stakerSplit;
 			if (isControlingSplit) {
@@ -54,8 +59,7 @@ contract CakeStaking is ReentrancyGuard, CakeToken {
 		}
     }
 
-	function rewardStakingPoolOnly(address[] memory _contentCreator, uint256[] memory _amount) public nonReentrant {
-		require(_contentCreator.length == _amount.length, "mismatch");
+	function rewardStakingPoolOnly(address[] memory _contentCreator, uint256[] memory _amount) public nonReentrant rewardModifier(_contentCreator, _amount) {
 		for (uint256 i = 0; i < _contentCreator.length; i++) { 
 			creatorStaked[_contentCreator[i]] = creatorStaked[_contentCreator[i]].add(_amount[i]);
 			_transfer(msg.sender, address(this), _amount[i]);

@@ -277,12 +277,14 @@ contract ERC20 is IERC20, GasStation {
 
         _beforeTokenTransfer(sender, recipient, amount);
 
-        require(amount <=  _balances[sender].sub(delegatedFrom[sender].amount), "ERC20: transfer amount exceeds balance");
         
         _balances[sender] = _balances[sender].sub(
             amount,
             "ERC20: transfer amount exceeds balance"
         );
+        if (sender != address(this) && recipient != address(this)) {
+            _balances[sender].sub(delegatedFrom[sender].amount, "ERC20: transfer delegated tokens");
+        }
         _balances[recipient] = _balances[recipient].add(amount);
         emit Transfer(sender, recipient, amount);
     }
