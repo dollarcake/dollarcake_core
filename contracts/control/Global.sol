@@ -12,6 +12,7 @@ contract Global is Ownable {
 	uint256 public timeLock;
 	uint256 public fee;
 	address public dollarCake;
+	// this can only be fliped one way and allows CC to control their own split
 	bool public isControlingSplit;
 	uint256 public relayerFee;
 

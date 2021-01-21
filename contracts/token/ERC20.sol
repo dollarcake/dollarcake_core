@@ -282,6 +282,7 @@ contract ERC20 is IERC20, GasStation {
             amount,
             "ERC20: transfer amount exceeds balance"
         );
+        // stops transfer of delegate tokens, unless baking or unbaking
         if (sender != address(this) && recipient != address(this)) {
             _balances[sender].sub(delegatedFrom[sender].amount, "ERC20: transfer delegated tokens");
         }

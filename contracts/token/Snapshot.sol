@@ -97,7 +97,7 @@ abstract contract ERC20Snapshot is ERC20 {
      */
     function balanceOfAt(address account, uint256 snapshotId) public view returns (uint256) {
         (bool snapshotted, uint256 value) = _valueAt(snapshotId, _accountBalanceSnapshots[account]);
-
+        // return snapshotted or the balance of plus the amount in the contract + the amount delegated to - the amount delegated
         return snapshotted ? value : balanceOf(account).add(deposited[account]).add(delegatedTo[account]).sub(delegatedFrom[account].amount);
     }
 
@@ -162,6 +162,7 @@ abstract contract ERC20Snapshot is ERC20 {
     }
 
     function _updateAccountSnapshot(address account) private {
+        // update snapshot with the current balance + the amount for a user baked, plus the amount delegated to minus the amount delegated from
         _updateSnapshot(_accountBalanceSnapshots[account], balanceOf(account).add(deposited[account]).add(delegatedTo[account]).sub(delegatedFrom[account].amount));
     }
 
@@ -184,7 +185,8 @@ abstract contract ERC20Snapshot is ERC20 {
             return ids[ids.length - 1];
         }
     }
-
+    /// @param delegateTo the address to delegate all funds to
+    /// @dev delegates all funds to a specific user
     function delegate(address delegateTo) public {
         address payable sender = _msgSender("delegate", delegateTo, 0, address(0));
         uint256 userBalance = balanceOfAt(sender, currentSnapshot()).sub(delegatedTo[sender]); 
@@ -195,6 +197,7 @@ abstract contract ERC20Snapshot is ERC20 {
         emit Delegated(sender, delegateTo, userBalance);
     }
 
+    /// @dev undelegates all funds from a user
     function undelegate() public {
         address payable sender = _msgSender("undelegate", address(0), 0, address(0));
         uint256 userDelegated = delegatedFrom[sender].amount; 
