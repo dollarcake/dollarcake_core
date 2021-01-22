@@ -254,8 +254,10 @@ describe("snapshot contract", function() {
   });
   it("should delegate and be unable to delegate again then undelegate", async () => {
     await staking.snapshot();
-	const balance = await staking.balanceOf(owner.address);
-	await expect(staking.delegate(alice.address)).to.emit(staking, "Delegated").withArgs(owner.address, alice.address, balance.toString())
+    const balance = await staking.balanceOf(owner.address);
+    await expect(staking.delegate(alice.address))
+      .to.emit(staking, "Delegated")
+      .withArgs(owner.address, alice.address, balance.toString());
     const delegated = await staking.delegatedFrom(owner.address);
     const delegatedTo = await staking.delegatedTo(alice.address);
     assert.equal(delegated[0], alice.address);
@@ -274,7 +276,9 @@ describe("snapshot contract", function() {
         "VM Exception while processing transaction: revert already delegated"
       );
     }
-	await expect(staking.undelegate()).to.emit(staking, "Undelegated").withArgs(owner.address, alice.address, balance.toString())
+    await expect(staking.undelegate())
+      .to.emit(staking, "Undelegated")
+      .withArgs(owner.address, alice.address, balance.toString());
     const delegatedAfter = await staking.delegatedFrom(owner.address);
     const delegatedToAfter = await staking.delegatedTo(alice.address);
     assert.equal(delegatedAfter[0], NULL_ADDRESS);
@@ -391,26 +395,26 @@ describe("snapshot contract", function() {
   it("should allow baking of delegated tokens but not rewarding", async () => {
     await staking.snapshot();
     const balance = await staking.balanceOf(owner.address);
-    await staking.delegate(alice.address);	
-	try {
-		await staking.reward([alice.address], ["1"])
-		should.fail("The call should have failed but didn't");
-	  } catch (e) {
-		assert.equal(
-		  e.message,
-		  "VM Exception while processing transaction: revert ERC20: reward from a delegated account"
-		);
-	  }
+    await staking.delegate(alice.address);
+    try {
+      await staking.reward([alice.address], ["1"]);
+      should.fail("The call should have failed but didn't");
+    } catch (e) {
+      assert.equal(
+        e.message,
+        "VM Exception while processing transaction: revert ERC20: reward from a delegated account"
+      );
+    }
 
-	  try {
-		await staking.rewardStakingPoolOnly([alice.address], ["1"]);
-		should.fail("The call should have failed but didn't");
-	  } catch (e) {
-		assert.equal(
-		  e.message,
-		  "VM Exception while processing transaction: revert ERC20: reward from a delegated account"
-		);
-	  }
-	  await staking.deposit(alice.address, balance);
+    try {
+      await staking.rewardStakingPoolOnly([alice.address], ["1"]);
+      should.fail("The call should have failed but didn't");
+    } catch (e) {
+      assert.equal(
+        e.message,
+        "VM Exception while processing transaction: revert ERC20: reward from a delegated account"
+      );
+    }
+    await staking.deposit(alice.address, balance);
   });
 });

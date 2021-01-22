@@ -137,4 +137,27 @@ describe("Forwarder contract", function() {
         assert.equal(relayerBalanceAfter.toString(), newFee, "alice should have one token")
 
     });
+
+    it("should delegate and undelegate", async function() {
+        await staking.snapshot();
+        const balanceOfOwner = await staking.balanceOf(owner.address)
+        const request = await staking.connect(relayer).populateTransaction.delegate(alice.address);
+        const nonce = await staking.nonce(owner.address)
+        const newData = await returnForwardRequest(ethers, owner, staking, "delegate", nonce, request, {to: alice.address, amount: 0, from: NULL_ADDRESS})   
+        request.data = newData
+        await relayer.sendTransaction(request);
+        const stakeOfAlice = await staking.balanceOfAt(alice.address, "1")
+        assert.equal(balanceOfOwner.toString(), stakeOfAlice.toString(), "alice should have delegate ")
+
+
+        const request2 = await staking.connect(relayer).populateTransaction.undelegate();
+        const nonce2 = await staking.nonce(owner.address)
+        const newData2 = await returnForwardRequest(ethers, owner, staking, "undelegate", nonce2, request2, {to: NULL_ADDRESS, amount: 0, from: NULL_ADDRESS})  
+        request2.data = newData2
+        await relayer.sendTransaction(request2);
+        const stakeOfAlice2 = await staking.balanceOfAt(alice.address, "1")
+
+        assert.equal(stakeOfAlice2.toString(), "0", "alice should have delegate ")
+
+    });
 });
