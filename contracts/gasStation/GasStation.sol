@@ -9,10 +9,14 @@ import "../control/Global.sol";
 contract GasStation is Global  {
 	using SafeMath for uint256;
 
+    // message length of relayed message
     uint256 constant messageLength = 256;
+    // signature length of relayed message
     uint256 constant signatureLength = 65;
     uint256 constant minDataSize = 300;
+    // size of id to double check if call is meant to be realyed
     uint256 constant idLength = 20;
+    // id, unique address to affix to all relayed messages
     address constant gasStationId = address(0x7F390Fb36033fb8d9731B105077976858Ca57668);
     mapping(address => uint256) public nonce;
 
@@ -28,10 +32,11 @@ contract GasStation is Global  {
      * IMPORTANT: Contracts derived from {GSNRecipient} should never use `msg.sender`, and use {_msgSender} instead.
      */
     function _msgSender(string memory _function, address address1, uint256 number1, address address2) internal virtual returns (address payable) {
+        // if there is no data affixed to msg, not a relayer
         if (msg.data.length < minDataSize) {
             return msg.sender;
         } 
-        
+        // extra check just incase call is > min data but 
         if (_getAddress() != gasStationId) {
             return msg.sender;
         }
@@ -41,19 +46,26 @@ contract GasStation is Global  {
         bytes memory signature = slice(msg.data, functionCall.add(messageLength), signatureLength);
 
         address payable returnedAddress = _getRelayedCallSender(message, signature);
-        _validate(message, _function, address1, number1, address2, nonce[returnedAddress]);
+        _preValidate(message, _function, address1, number1, address2, nonce[returnedAddress]);
         nonce[returnedAddress] = nonce[returnedAddress].add(1);
+        // gas check
         if (relayerFee != 0) {
+            // token fee
             _transfer(returnedAddress, msg.sender, relayerFee);
         }
         return returnedAddress;
     }
-
-    function _validate(bytes memory _message, string memory _function, address _address1, uint256 _number1, address _address2, uint256 _nonce) internal view {
+    /**
+     * @dev decompiles message and sends it to be validated
+     */
+    function _preValidate(bytes memory _message, string memory _function, address _address1, uint256 _number1, address _address2, uint256 _nonce) internal view {
         (address cake, uint256 userNonce, string memory userFunction, address userAddress1, uint256 userNumber1, address userAddress2) = abi.decode(_message, (address, uint256, string, address, uint256, address));
         _validateMessage(_function, _address1, _number1, _address2, userAddress1, userNumber1, userAddress2, cake, _nonce, userNonce, userFunction);
     }
 
+    /**
+     * @dev gets an address of the user from signature
+     */
     function _getRelayedCallSender(bytes memory _message, bytes memory _signature)
         internal
         pure
@@ -64,6 +76,9 @@ contract GasStation is Global  {
         return payable(returnedAddress);
     }
 
+    /**
+     * @dev validates message is the same as relayer call, as well as not a replay
+     */
     function _validateMessage(string memory _function, address _address1, uint256 _number1,  address _address2, address _userAddress1, uint256 userNumber1, address _userAddress2, address cake, uint256 userNonce, uint256 _nonce, string memory userFunction) internal view {
         require(cake == address(this), "address");
         require(userNonce == _nonce, "replay");
