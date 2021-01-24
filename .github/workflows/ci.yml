@@ -1,0 +1,40 @@
+name: ci
+
+on:
+  # Triggers the workflow on push or pull request events but only for the main branch
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        node-version: [14.x]
+
+    steps:
+      - uses: actions/checkout@v1
+
+      - name: Use Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v1
+        with:
+          node-version: ${{ matrix.node-version }}
+
+      - name: npm install
+        run: |
+          npm install
+
+      - name: compile
+        run: |
+          npm run compile
+
+      - name: test
+        run: |
+          npm run test      
+
+      # - name: lint
+      #   run: |
+      #     npm run solhint
