@@ -10,7 +10,7 @@
     "deploy": "hardhat run scripts/deploy-system-script.js",
     "compile": "hardhat compile",
     "solhint": "./node_modules/.bin/solhint -f table contracts/**/*.sol contracts/*.sol",
-    "fix": "./node_modules/.bin/prettier --write contracts/**/*.sol && ./node_modules/.bin/prettier --write contracts/*.sol",
+    "fix": "./node_modules/.bin/prettier --write contracts/**/*.sol",
     "coverage": "hardhat coverage --solcoverjs ./.solcover.js --temp artifacts --testfiles \"./test/**/*.ts\""
   },
   "author": "",
