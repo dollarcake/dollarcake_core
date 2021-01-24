@@ -79,9 +79,9 @@ npx hardhat run scripts/deploy-script.js
 
 [x] add params to gas station check
 
-[] add auditing tools
+[x] add auditing tools
 
-[] documentation 
+[x] documentation 
 
 [x] delegate
 
