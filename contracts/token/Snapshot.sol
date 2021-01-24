@@ -46,8 +46,8 @@ abstract contract ERC20Snapshot is ERC20 {
         uint256[] values;
     }
 
-    mapping (address => Snapshots) private _accountBalanceSnapshots;
-    mapping (address =>  uint256) public deposited; // user to CC to amount
+    mapping(address => Snapshots) private _accountBalanceSnapshots;
+    mapping(address => uint256) public deposited; // user to CC to amount
     Snapshots private _totalSupplySnapshots;
 
     // Snapshot ids increase monotonically, with the first value being 1. An id of 0 is invalid.
@@ -59,6 +59,7 @@ abstract contract ERC20Snapshot is ERC20 {
     event Snapshot(uint256 id);
     event Delegated(address indexed from, address indexed to, uint256 amount);
     event Undelegated(address indexed from, address indexed to, uint256 amount);
+
     /**
      * @dev Creates a new snapshot and returns its snapshot id.
      *
@@ -80,7 +81,7 @@ abstract contract ERC20Snapshot is ERC20 {
      * We haven't measured the actual numbers; if this is something you're interested in please reach out to us.
      * ====
      */
-    function snapshot() public onlyOwner virtual returns (uint256) {
+    function snapshot() public virtual onlyOwner returns (uint256) {
         _currentSnapshotId.increment();
 
         uint256 currentId = _currentSnapshotId.current();
@@ -88,55 +89,75 @@ abstract contract ERC20Snapshot is ERC20 {
         return currentId;
     }
 
-	function currentSnapshot() public view returns (uint256) {
-		return _currentSnapshotId.current();
-	}
+    function currentSnapshot() public view returns (uint256) {
+        return _currentSnapshotId.current();
+    }
 
     /**
      * @dev Retrieves the balance of `account` at the time `snapshotId` was created.
      */
-    function balanceOfAt(address account, uint256 snapshotId) public view returns (uint256) {
-        (bool snapshotted, uint256 value) = _valueAt(snapshotId, _accountBalanceSnapshots[account]);
+    function balanceOfAt(address account, uint256 snapshotId)
+        public
+        view
+        returns (uint256)
+    {
+        (bool snapshotted, uint256 value) =
+            _valueAt(snapshotId, _accountBalanceSnapshots[account]);
         // return snapshotted or the balance of plus the amount in the contract + the amount delegated to - the amount delegated
-        return snapshotted ? value : balanceOf(account).add(deposited[account]).add(delegatedTo[account]).sub(delegatedFrom[account].amount);
+        return
+            snapshotted
+                ? value
+                : balanceOf(account)
+                    .add(deposited[account])
+                    .add(delegatedTo[account])
+                    .sub(delegatedFrom[account].amount);
     }
 
     /**
      * @dev Retrieves the total supply at the time `snapshotId` was created.
      */
-    function totalSupplyAt(uint256 snapshotId) public view returns(uint256) {
-        (bool snapshotted, uint256 value) = _valueAt(snapshotId, _totalSupplySnapshots);
+    function totalSupplyAt(uint256 snapshotId) public view returns (uint256) {
+        (bool snapshotted, uint256 value) =
+            _valueAt(snapshotId, _totalSupplySnapshots);
 
         return snapshotted ? value : totalSupply();
     }
 
-
     // Update balance and/or total supply snapshots before the values are modified. This is implemented
     // in the _beforeTokenTransfer hook, which is executed for _mint, _burn, and _transfer operations.
-    function _beforeTokenTransfer(address from, address to, uint256 amount) internal virtual override {
-      super._beforeTokenTransfer(from, to, amount);
+    function _beforeTokenTransfer(
+        address from,
+        address to,
+        uint256 amount
+    ) internal virtual override {
+        super._beforeTokenTransfer(from, to, amount);
 
-      if (from == address(0)) {
-        // mint
-        _updateAccountSnapshot(to);
-        _updateTotalSupplySnapshot();
-      } else if (to == address(0)) {
-        // burn
-        _updateAccountSnapshot(from);
-        _updateTotalSupplySnapshot();
-      } else {
-        // transfer
-        _updateAccountSnapshot(from);
-        _updateAccountSnapshot(to);
-      }
+        if (from == address(0)) {
+            // mint
+            _updateAccountSnapshot(to);
+            _updateTotalSupplySnapshot();
+        } else if (to == address(0)) {
+            // burn
+            _updateAccountSnapshot(from);
+            _updateTotalSupplySnapshot();
+        } else {
+            // transfer
+            _updateAccountSnapshot(from);
+            _updateAccountSnapshot(to);
+        }
     }
 
     function _valueAt(uint256 snapshotId, Snapshots storage snapshots)
-        private view returns (bool, uint256)
+        private
+        view
+        returns (bool, uint256)
     {
         require(snapshotId > 0, "ERC20Snapshot: id is 0");
         // solhint-disable-next-line max-line-length
-        require(snapshotId <= _currentSnapshotId.current(), "ERC20Snapshot: nonexistent id");
+        require(
+            snapshotId <= _currentSnapshotId.current(),
+            "ERC20Snapshot: nonexistent id"
+        );
 
         // When a valid snapshot is queried, there are three possibilities:
         //  a) The queried value was not modified after the snapshot was taken. Therefore, a snapshot entry was never
@@ -163,14 +184,22 @@ abstract contract ERC20Snapshot is ERC20 {
 
     function _updateAccountSnapshot(address account) private {
         // update snapshot with the current balance + the amount for a user baked, plus the amount delegated to minus the amount delegated from
-        _updateSnapshot(_accountBalanceSnapshots[account], balanceOf(account).add(deposited[account]).add(delegatedTo[account]).sub(delegatedFrom[account].amount));
+        _updateSnapshot(
+            _accountBalanceSnapshots[account],
+            balanceOf(account)
+                .add(deposited[account])
+                .add(delegatedTo[account])
+                .sub(delegatedFrom[account].amount)
+        );
     }
 
     function _updateTotalSupplySnapshot() private {
         _updateSnapshot(_totalSupplySnapshots, totalSupply());
     }
 
-    function _updateSnapshot(Snapshots storage snapshots, uint256 currentValue) private {
+    function _updateSnapshot(Snapshots storage snapshots, uint256 currentValue)
+        private
+    {
         uint256 currentId = _currentSnapshotId.current();
         if (_lastSnapshotId(snapshots.ids) < currentId) {
             snapshots.ids.push(currentId);
@@ -178,18 +207,25 @@ abstract contract ERC20Snapshot is ERC20 {
         }
     }
 
-    function _lastSnapshotId(uint256[] storage ids) private view returns (uint256) {
+    function _lastSnapshotId(uint256[] storage ids)
+        private
+        view
+        returns (uint256)
+    {
         if (ids.length == 0) {
             return 0;
         } else {
             return ids[ids.length - 1];
         }
     }
+
     /// @param delegateTo the address to delegate all funds to
     /// @dev delegates all funds to a specific user
     function delegate(address delegateTo) public {
-        address payable sender = _msgSender("delegate", delegateTo, 0, address(0));
-        uint256 userBalance = balanceOfAt(sender, currentSnapshot()).sub(delegatedTo[sender]); 
+        address payable sender =
+            _msgSender("delegate", delegateTo, 0, address(0));
+        uint256 userBalance =
+            balanceOfAt(sender, currentSnapshot()).sub(delegatedTo[sender]);
         require(delegatedFrom[sender].amount == 0, "already delegated");
         delegatedFrom[sender].amount = userBalance;
         delegatedFrom[sender].delegatedTo = delegateTo;
@@ -199,10 +235,13 @@ abstract contract ERC20Snapshot is ERC20 {
 
     /// @dev undelegates all funds from a user
     function undelegate() public {
-        address payable sender = _msgSender("undelegate", address(0), 0, address(0));
-        uint256 userDelegated = delegatedFrom[sender].amount; 
+        address payable sender =
+            _msgSender("undelegate", address(0), 0, address(0));
+        uint256 userDelegated = delegatedFrom[sender].amount;
         address undelegateFrom = delegatedFrom[sender].delegatedTo;
-        delegatedTo[undelegateFrom] = delegatedTo[undelegateFrom].sub(userDelegated);
+        delegatedTo[undelegateFrom] = delegatedTo[undelegateFrom].sub(
+            userDelegated
+        );
         delete delegatedFrom[sender];
         emit Undelegated(sender, undelegateFrom, userDelegated);
     }

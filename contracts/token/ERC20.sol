@@ -7,6 +7,7 @@ import "../openzeppelin/token/ERC20/IERC20.sol";
 import "../openzeppelin/math/SafeMath.sol";
 import "../openzeppelin/utils/Address.sol";
 import "../openzeppelin/token/ERC20/IERC20.sol";
+
 /**
  * @dev Implementation of the {IERC20} interface.
  *
@@ -45,7 +46,7 @@ contract ERC20 is IERC20, GasStation {
     mapping(address => mapping(address => uint256)) private _allowances;
     mapping(address => uint256) public delegatedTo;
     mapping(address => DelegatedInfo) public delegatedFrom;
-    
+
     uint256 private _totalSupply;
 
     string private _name;
@@ -61,10 +62,7 @@ contract ERC20 is IERC20, GasStation {
      * All three of these values are immutable: they can only be set once during
      * construction.
      */
-    constructor(
-        string memory name,
-        string memory symbol
-    ) public GasStation() {
+    constructor(string memory name, string memory symbol) public GasStation() {
         _name = name;
         _symbol = symbol;
         _decimals = 18;
@@ -130,7 +128,8 @@ contract ERC20 is IERC20, GasStation {
         override
         returns (bool)
     {
-        address payable sender = _msgSender("transfer", recipient, amount, address(0));
+        address payable sender =
+            _msgSender("transfer", recipient, amount, address(0));
         _transfer(sender, recipient, amount);
         return true;
     }
@@ -161,7 +160,8 @@ contract ERC20 is IERC20, GasStation {
         override
         returns (bool)
     {
-         address payable sender = _msgSender("approve", spender, amount, address(0));
+        address payable sender =
+            _msgSender("approve", spender, amount, address(0));
         _approve(sender, spender, amount);
         return true;
     }
@@ -183,7 +183,8 @@ contract ERC20 is IERC20, GasStation {
         address recipient,
         uint256 amount
     ) public virtual override returns (bool) {
-        address payable _sender = _msgSender("transferFrom", recipient, amount, sender);
+        address payable _sender =
+            _msgSender("transferFrom", recipient, amount, sender);
         _transfer(sender, recipient, amount);
         _approve(
             sender,
@@ -213,12 +214,9 @@ contract ERC20 is IERC20, GasStation {
         virtual
         returns (bool)
     {
-        address payable sender = _msgSender("increaseAllowance", spender, addedValue, address(0));
-        _approve(
-            sender,
-            spender,
-            _allowances[sender][spender].add(addedValue)
-        );
+        address payable sender =
+            _msgSender("increaseAllowance", spender, addedValue, address(0));
+        _approve(sender, spender, _allowances[sender][spender].add(addedValue));
         return true;
     }
 
@@ -241,7 +239,13 @@ contract ERC20 is IERC20, GasStation {
         virtual
         returns (bool)
     {
-        address payable sender = _msgSender("decreaseAllowance", spender, subtractedValue, address(0));
+        address payable sender =
+            _msgSender(
+                "decreaseAllowance",
+                spender,
+                subtractedValue,
+                address(0)
+            );
         _approve(
             sender,
             spender,
@@ -277,14 +281,16 @@ contract ERC20 is IERC20, GasStation {
 
         _beforeTokenTransfer(sender, recipient, amount);
 
-        
         _balances[sender] = _balances[sender].sub(
             amount,
             "ERC20: transfer amount exceeds balance"
         );
         // stops transfer of delegate tokens, unless baking or unbaking
         if (sender != address(this) && recipient != address(this)) {
-            _balances[sender].sub(delegatedFrom[sender].amount, "ERC20: transfer delegated tokens");
+            _balances[sender].sub(
+                delegatedFrom[sender].amount,
+                "ERC20: transfer delegated tokens"
+            );
         }
         _balances[recipient] = _balances[recipient].add(amount);
         emit Transfer(sender, recipient, amount);
