@@ -46,7 +46,7 @@ npx hardhat run scripts/deploy-script.js
 
 [x] Global Only Owner for staking - min inital and time lock (only gets written in on staking)
 
-[x] GSN network currently allows the relayer to make any tx for anyone
+[x] GSN network currently allows the relayer to make any tx for anyone 
 
 [x] GSN network positive tests
 
