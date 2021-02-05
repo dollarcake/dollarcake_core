@@ -47,7 +47,7 @@ contract GasStation is Global {
        
         if (!relayer[msg.sender]) {
             return msg.sender;
-        }
+        } 
 
         uint256 functionCall =
             msg.data.length.sub(
