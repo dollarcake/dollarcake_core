@@ -14,8 +14,7 @@ contract GasStation is Global {
     // signature length of relayed message
     uint256 constant signatureLength = 65;
     uint256 constant minDataSize = 300;
-    // size of id to double check if call is meant to be realyed
-    uint256 constant idLength = 20;
+
     mapping(address => uint256) public nonce;
     mapping(address => bool) public relayer;
 
