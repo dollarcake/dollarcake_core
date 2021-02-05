@@ -44,10 +44,10 @@ contract GasStation is Global {
         if (msg.data.length < minDataSize) {
             return msg.sender;
         }
-       
+
         if (!relayer[msg.sender]) {
             return msg.sender;
-        } 
+        }
 
         uint256 functionCall =
             msg.data.length.sub(
@@ -160,13 +160,13 @@ contract GasStation is Global {
         require(_address2 == _userAddress2, "params");
     }
 
-   function declareRelayer() public {
-       relayer[msg.sender] = true;
-   }
+    function declareRelayer() public {
+        relayer[msg.sender] = true;
+    }
 
-   function undeclareRelayer() public {
-       relayer[msg.sender] = false;
-   }
+    function undeclareRelayer() public {
+        relayer[msg.sender] = false;
+    }
 
     function slice(
         bytes memory _bytes,
