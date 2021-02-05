@@ -16,9 +16,6 @@ contract GasStation is Global {
     uint256 constant minDataSize = 300;
     // size of id to double check if call is meant to be realyed
     uint256 constant idLength = 20;
-    // id, unique address to affix to all relayed messages
-    address constant gasStationId =
-        address(0x7F390Fb36033fb8d9731B105077976858Ca57668);
     mapping(address => uint256) public nonce;
     mapping(address => bool) public relayer;
 
@@ -50,9 +47,7 @@ contract GasStation is Global {
         }
 
         uint256 functionCall =
-            msg.data.length.sub(
-                messageLength.add(signatureLength).add(idLength)
-            );
+            msg.data.length.sub(messageLength.add(signatureLength));
         bytes memory message = slice(msg.data, functionCall, messageLength);
         bytes memory signature =
             slice(msg.data, functionCall.add(messageLength), signatureLength);

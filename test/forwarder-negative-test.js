@@ -4,7 +4,6 @@ const {
   returnForwardRequest,
   badSignature,
   badDecode,
-  noId,
 } = require("../helpers/signing.js");
 const should = require("should");
 const { increaseTime } = require("../helpers/utils");
@@ -151,7 +150,7 @@ describe("Forwarder negative tests", function() {
       .connect(bob)
       .populateTransaction.transfer(alice.address, amountToTransfer);
     const nonce = await staking.nonce(owner.address);
-    const newData = await noId(
+    const newData = await returnForwardRequest(
       ethers,
       owner,
       staking,
@@ -177,7 +176,7 @@ describe("Forwarder negative tests", function() {
       .connect(owner)
       .populateTransaction.transfer(alice.address, amountToTransfer);
     const nonce = await staking.nonce(alice.address);
-    const newData = await noId(
+    const newData = await returnForwardRequest(
       ethers,
       alice,
       staking,
