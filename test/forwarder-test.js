@@ -12,6 +12,7 @@ describe("Forwarder contract", function() {
 		[owner, alice, bob, relayer, charlie] = await ethers.getSigners();
         let Contract = await ethers.getContractFactory("CakeStaking");
         staking = await Contract.deploy("cake", "cake");
+        await staking.connect(relayer).declareRelayer()
 	});
     it("Check token balance", async function() {
         const balance = await staking.balanceOf(owner.address);
