@@ -38,6 +38,7 @@ contract Global is Ownable {
         external
         onlyOwner
     {
+        // can eiter be 10 or 90% of rewards
         require(
             _globalStakerSplit <= 90 && _globalStakerSplit >= 10,
             "not in bounds"
@@ -51,6 +52,7 @@ contract Global is Ownable {
     }
 
     function changeFee(uint256 _fee) external onlyOwner {
+        // can either be 0-7% fee
         require(_fee <= 1000 && _fee >= 930, "not in bounds");
         fee = _fee;
     }
