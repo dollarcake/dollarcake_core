@@ -7,7 +7,10 @@
 	  "mark-callable-contracts": "off",
 	  "no-empty-blocks": "off",
 	  "not-rely-on-time": "off",
-	  "compiler-version": "off"
+	  "compiler-version": "off",
+	  "no-inline-assembly": "off",
+	  "reason-string": "off"
+
 	},
 	"plugins": ["prettier"]
   }
