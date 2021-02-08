@@ -10,10 +10,10 @@ contract GasStation is Global {
     using SafeMath for uint256;
 
     // message length of relayed message
-    uint256 constant messageLength = 256;
+    uint256 private constant MESSAGE_LENGTH = 256;
     // signature length of relayed message
-    uint256 constant signatureLength = 65;
-    uint256 constant minDataSize = 300;
+    uint256 private constant SIGNATURE_LENGTH = 65;
+    uint256 private constant MIN_DATA_SIZE = 300;
 
     mapping(address => uint256) public nonce;
     mapping(address => bool) public relayer;
@@ -37,7 +37,7 @@ contract GasStation is Global {
         address address2
     ) internal virtual returns (address payable) {
         // if there is no data affixed to msg, not a relayer
-        if (msg.data.length < minDataSize) {
+        if (msg.data.length < MIN_DATA_SIZE) {
             return msg.sender;
         }
 
@@ -46,10 +46,10 @@ contract GasStation is Global {
         }
 
         uint256 functionCall =
-            msg.data.length.sub(messageLength.add(signatureLength));
-        bytes memory message = slice(msg.data, functionCall, messageLength);
+            msg.data.length.sub(MESSAGE_LENGTH.add(SIGNATURE_LENGTH));
+        bytes memory message = slice(msg.data, functionCall, MESSAGE_LENGTH);
         bytes memory signature =
-            slice(msg.data, functionCall.add(messageLength), signatureLength);
+            slice(msg.data, functionCall.add(MESSAGE_LENGTH), SIGNATURE_LENGTH);
 
         address payable returnedAddress =
             _getRelayedCallSender(message, signature);
