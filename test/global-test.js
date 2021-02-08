@@ -120,6 +120,18 @@ describe("global contract", function() {
 			)
 		}
 	})
+
+	it("should fail to change time lock too high", async function() {
+		try {
+			await staking.changeTimeLock(31556953)
+			should.fail("The call should have failed but didn't")
+		} catch(e) {
+			assert.equal(
+				e.message, 
+				"VM Exception while processing transaction: revert not in bounds"
+			)
+		}
+	})
 	it("should change fee", async function() {
 		await staking.changeFee(940)
 		const fee = await staking.fee()
