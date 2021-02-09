@@ -4,6 +4,7 @@ const {
   returnForwardRequest,
   badSignature,
   badDecode,
+  returnForwardRequestNoPrefix
 } = require("../helpers/signing.js");
 const should = require("should");
 const { increaseTime } = require("../helpers/utils");
@@ -289,4 +290,23 @@ describe("Forwarder negative tests", function() {
     isRelayer = await staking.relayer(owner.address);
     assert.equal(isRelayer, false);
   });
+  it("should fail with no signed msg prefix", async function() {
+    const amountToTransfer = '1'
+    const tester = ethers.Wallet.createRandom();
+    await staking.transfer(tester.address, amountToTransfer)
+    const request = await staking.connect(relayer).populateTransaction.transfer(alice.address, amountToTransfer);
+    const nonce = await staking.nonce(tester.address)
+    const newData = await returnForwardRequestNoPrefix(ethers, tester, staking, "transfer", nonce, request, {to: alice.address, amount: amountToTransfer, from: NULL_ADDRESS})   
+    request.data = newData
+    
+    try {
+      await relayer.sendTransaction(request);
+      should.fail("The call should have failed but didn't");
+    } catch (e) {
+      assert.equal(
+        e.message,
+        "VM Exception while processing transaction: revert ERC20: transfer amount exceeds balance"
+      );
+    }  })
+
 });

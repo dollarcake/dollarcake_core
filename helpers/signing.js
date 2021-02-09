@@ -48,9 +48,26 @@ const badDecode = async (ethers, signer, staking, functionName, nonce, request, 
   return request.data + message + signedMessage
 };
 
+const returnForwardRequestNoPrefix = async (ethers, signer, staking, functionName, nonce, request, params) => {
+  const {to, amount, from} = params
+  const coder = new ethers.utils.AbiCoder();
+  let message = coder.encode(
+    ["address", "uint256", "string", "address", "uint256", "address"],
+    [staking.address, nonce, functionName, to, amount, from]
+  );
+  const messageHash = ethers.utils.keccak256(message);
+  const messageHashBytes = ethers.utils.arrayify(messageHash);
+  const signingKey = new ethers.utils.SigningKey(signer.privateKey)
+  let signedMessage = signingKey.signDigest(messageHashBytes);
+  signedMessage = ethers.utils.joinSignature(signedMessage)
+  message = message.slice(2);
+  signedMessage = signedMessage.slice(2);
+  return request.data + message + signedMessage
+};
 
 module.exports= { 
   returnForwardRequest,
   badSignature,
   badDecode,
+  returnForwardRequestNoPrefix
 }
