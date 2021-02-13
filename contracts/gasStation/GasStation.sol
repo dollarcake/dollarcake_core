@@ -13,7 +13,6 @@ contract GasStation is Global {
     uint256 private constant MESSAGE_LENGTH = 256;
     // signature length of relayed message
     uint256 private constant SIGNATURE_LENGTH = 65;
-    uint256 private constant MIN_DATA_SIZE = 300;
 
     mapping(address => uint256) public nonce;
     mapping(address => bool) public relayer;
@@ -36,10 +35,6 @@ contract GasStation is Global {
         uint256 number1,
         address address2
     ) internal virtual returns (address payable) {
-        // if there is no data affixed to msg, not a relayer
-        if (msg.data.length < MIN_DATA_SIZE) {
-            return msg.sender;
-        }
 
         if (!relayer[msg.sender]) {
             return msg.sender;
