@@ -154,10 +154,12 @@ contract GasStation is Global {
         require(_address2 == _userAddress2, "params");
     }
 
+    /// @notice declares the sender a relayer
     function declareRelayer() public {
         relayer[msg.sender] = true;
     }
 
+    /// @notice undeclares the sender a relayer
     function undeclareRelayer() public {
         relayer[msg.sender] = false;
     }
