@@ -189,10 +189,10 @@ contract CakeStaking is ReentrancyGuard, CakeToken {
             : deposited[sender].sub(payout);
         userStake[_contentCreator][sender] = userStake[_contentCreator][sender]
             .sub(_userStake);
-        
+
         assert(payout <= creatorStaked[_contentCreator]);
         assert(_userStake <= contentTotalPayout[_contentCreator]);
-        
+
         creatorStaked[_contentCreator] = creatorStaked[_contentCreator].sub(
             payout
         );
