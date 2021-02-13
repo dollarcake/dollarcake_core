@@ -35,7 +35,6 @@ contract GasStation is Global {
         uint256 number1,
         address address2
     ) internal virtual returns (address payable) {
-
         if (!relayer[msg.sender]) {
             return msg.sender;
         }
