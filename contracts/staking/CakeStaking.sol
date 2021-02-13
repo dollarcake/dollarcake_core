@@ -34,7 +34,7 @@ contract CakeStaking is ReentrancyGuard, CakeToken {
     event UserDeposit(
         address indexed user,
         address indexed contentCreator,
-        uint256 amountDesposited,
+        uint256 amountDeposited,
         uint256 payout
     );
     event UserWithdrawal(
