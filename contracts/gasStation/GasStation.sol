@@ -159,9 +159,9 @@ contract GasStation is Global {
         relayer[msg.sender] = true;
     }
 
-    /// @notice undeclares the sender a relayer
+    /// @notice deletes the sender as relayer
     function undeclareRelayer() public {
-        relayer[msg.sender] = false;
+        delete relayer[msg.sender];
     }
 
     function slice(
