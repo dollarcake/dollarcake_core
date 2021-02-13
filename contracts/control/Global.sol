@@ -38,6 +38,7 @@ contract Global is Ownable {
         external
         onlyOwner
     {
+        // can eiter be 10 or 90% of rewards
         require(
             _globalStakerSplit <= 90 && _globalStakerSplit >= 10,
             "not in bounds"
@@ -46,11 +47,12 @@ contract Global is Ownable {
     }
 
     function changeTimeLock(uint256 _timeLock) external onlyOwner {
-        require(_timeLock >= 1 hours, "not in bounds");
+        require(_timeLock >= 1 hours && _timeLock <= 52 weeks, "not in bounds");
         timeLock = _timeLock;
     }
 
     function changeFee(uint256 _fee) external onlyOwner {
+        // can either be 0-7% fee
         require(_fee <= 1000 && _fee >= 930, "not in bounds");
         fee = _fee;
     }

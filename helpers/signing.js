@@ -13,7 +13,7 @@ const returnForwardRequest = async (ethers, signer, staking, functionName, nonce
   let signedMessage = await signer.signMessage(messageHashBytes);
   message = message.slice(2);
   signedMessage = signedMessage.slice(2);
-  return request.data + message + signedMessage + addressId
+  return request.data + message + signedMessage
 };
 
 const badSignature = async (ethers, signer, staking, functionName, nonce, request, params) => {
@@ -29,7 +29,7 @@ const badSignature = async (ethers, signer, staking, functionName, nonce, reques
   let signedMessage = await signer.signMessage(messageHashBytes);
   message = message.slice(2);
   signedMessage = "0a614ad6d43595d72001d14861159c902c27b13eb5cf7d4ad1a7bac63c011d2d7d9771997b30cd0d6abd85db42973ee70ada610c119efeec81dfaeb4e6d339be1d"
-  return request.data + message + signedMessage + addressId
+  return request.data + message + signedMessage
 };
 
 const badDecode = async (ethers, signer, staking, functionName, nonce, request, params) => {
@@ -45,29 +45,29 @@ const badDecode = async (ethers, signer, staking, functionName, nonce, request, 
   let signedMessage = await signer.signMessage(messageHashBytes);
   message = message.slice(2);
   signedMessage = signedMessage.slice(2);
-  return request.data + message + signedMessage + addressId
+  return request.data + message + signedMessage
 };
 
-const noId = async (ethers, signer, staking, functionName, nonce, request, params) => {
+const returnForwardRequestNoPrefix = async (ethers, signer, staking, functionName, nonce, request, params) => {
   const {to, amount, from} = params
   const coder = new ethers.utils.AbiCoder();
   let message = coder.encode(
     ["address", "uint256", "string", "address", "uint256", "address"],
     [staking.address, nonce, functionName, to, amount, from]
-  )
-
+  );
   const messageHash = ethers.utils.keccak256(message);
   const messageHashBytes = ethers.utils.arrayify(messageHash);
-  let signedMessage = await signer.signMessage(messageHashBytes);
+  const signingKey = new ethers.utils.SigningKey(signer.privateKey)
+  let signedMessage = signingKey.signDigest(messageHashBytes);
+  signedMessage = ethers.utils.joinSignature(signedMessage)
   message = message.slice(2);
   signedMessage = signedMessage.slice(2);
   return request.data + message + signedMessage
 };
 
-
 module.exports= { 
   returnForwardRequest,
   badSignature,
   badDecode,
-  noId
+  returnForwardRequestNoPrefix
 }

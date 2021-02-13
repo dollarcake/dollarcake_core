@@ -94,7 +94,8 @@ abstract contract ERC20Snapshot is ERC20 {
     }
 
     /**
-     * @dev Retrieves the balance of `account` at the time `snapshotId` was created.
+     * @dev Retrieves the balance of `account` at the time `snapshotId` was created
+     *      Also inclides the deposided, delegatedTo and subtracts delegateFrom
      */
     function balanceOfAt(address account, uint256 snapshotId)
         public
