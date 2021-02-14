@@ -26,16 +26,6 @@ describe("long form staking contract", function() {
 		await staking.transfer(bob.address, (bobDeposit * 2 ).toString())
 		await staking.transfer(dave.address, (daveDeposit).toString())
 
-		try {
-			await staking.deposit(charlie.address, 10)
-			should.fail("The call should have failed but didn't")
-		} catch(e) {
-			assert.equal(
-				e.message, 
-				"VM Exception while processing transaction: revert minimum first stake"
-			)
-
-		}
 
 		await staking.connect(alice).deposit(charlie.address, aliceDeposit.toString())
 		await staking.connect(alice).deposit(erin.address, aliceDeposit.toString())

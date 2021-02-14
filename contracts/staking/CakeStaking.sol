@@ -149,9 +149,6 @@ contract CakeStaking is ReentrancyGuard, CakeToken {
 
         uint256 payout;
         if (contentTotalPayout[_contentCreator] == 0) {
-            // For auditor: I don't think this is needed, but Im worried about small numbers messing up the math, uint stuff
-            // that being said someone can with draw, all but 1 wei then skip this check, I wrote a test for that, so this should be unnecessary
-            require(_amount >= minInitialDeposit, "minimum first stake");
             payout = _amount;
         } else {
             payout = _amount.mul(contentTotalPayout[_contentCreator]).div(
@@ -192,6 +189,10 @@ contract CakeStaking is ReentrancyGuard, CakeToken {
             : deposited[sender].sub(payout);
         userStake[_contentCreator][sender] = userStake[_contentCreator][sender]
             .sub(_userStake);
+
+        assert(payout <= creatorStaked[_contentCreator]);
+        assert(_userStake <= contentTotalPayout[_contentCreator]);
+
         creatorStaked[_contentCreator] = creatorStaked[_contentCreator].sub(
             payout
         );

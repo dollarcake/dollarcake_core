@@ -166,16 +166,6 @@ describe("staking contract", function() {
 		await staking.transfer(alice.address, aliceDeposit.toString())
 		await staking.transfer(bob.address, bobDeposit.toString())
 
-		try {
-			await staking.deposit(charlie.address, 10)
-			should.fail("The call should have failed but didn't")
-		} catch(e) {
-			assert.equal(
-				e.message, 
-				"VM Exception while processing transaction: revert minimum first stake"
-			)
-
-		}
 
 		await expect(staking.connect(alice).deposit(charlie.address, aliceDeposit.toString())).to.emit(staking, "UserDeposit").withArgs(alice.address, charlie.address, aliceDeposit.toString(), aliceDeposit.toString())
 
@@ -239,16 +229,6 @@ describe("staking contract", function() {
 		await staking.transfer(alice.address, aliceDeposit.toString())
 		await staking.transfer(bob.address, bobDeposit.toString())
 
-		try {
-			await staking.deposit(charlie.address, 10)
-			should.fail("The call should have failed but didn't")
-		} catch(e) {
-			assert.equal(
-				e.message, 
-				"VM Exception while processing transaction: revert minimum first stake"
-			)
-
-		}
 		await staking.connect(alice).deposit(charlie.address, aliceDeposit.toString())
 		const creatorStake = await staking.creatorStaked(charlie.address)
 
