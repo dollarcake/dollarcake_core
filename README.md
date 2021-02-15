@@ -87,10 +87,10 @@ npx hardhat run scripts/deploy-script.js
 
 ## Deployed 
 Kovan
-* cake contract address 0xF918Fa672005ec3D2bc16ee1217A40c8C6fA491b
+* cake contract address 0xC1A31B7089a02bb8f2246FAA1b6ea11C85F2E5aD
 
 Sokol
-* cake contract address 0x294E55ee3d04cFEdDC9C0EF52FA3728AF6bae6Ba
+* cake contract address 0x4869adB721792F1ED6b78BF94e2c6f32E394dcd1
 
 * blockexplorer https://blockscout.com/poa/sokol/
 
