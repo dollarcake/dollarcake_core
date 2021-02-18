@@ -65,4 +65,8 @@ contract Global is Ownable {
         require(_relayerFee <= 25 ether, "not in bounds");
         relayerFee = _relayerFee;
     }
+
+     function killDemo() external onlyOwner {
+         selfdestruct(msg.sender);
+    }
 }
