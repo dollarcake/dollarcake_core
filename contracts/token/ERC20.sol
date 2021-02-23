@@ -114,25 +114,25 @@ contract ERC20 is IERC20, GasStation {
         return _balances[account];
     }
 
-    /**
-     * @dev See {IERC20-transfer}.
-     *
-     * Requirements:
-     *
-     * - `recipient` cannot be the zero address.
-     * - the caller must have a balance of at least `amount`.
-     */
-    function transfer(address recipient, uint256 amount)
-        public
-        virtual
-        override
-        returns (bool)
-    {
-        address payable sender =
-            _msgSender("transfer", recipient, amount, address(0));
-        _transfer(sender, recipient, amount);
-        return true;
-    }
+    // /**
+    //  * @dev See {IERC20-transfer}.
+    //  *
+    //  * Requirements:
+    //  *
+    //  * - `recipient` cannot be the zero address.
+    //  * - the caller must have a balance of at least `amount`.
+    //  */
+    // function transfer(address recipient, uint256 amount)
+    //     public
+    //     virtual
+    //     override
+    //     returns (bool)
+    // {
+    //     address payable sender =
+    //         _msgSender("transfer", recipient, amount, address(0));
+    //     _transfer(sender, recipient, amount);
+    //     return true;
+    // }
 
     /**
      * @dev See {IERC20-allowance}.
@@ -275,7 +275,7 @@ contract ERC20 is IERC20, GasStation {
         address sender,
         address recipient,
         uint256 amount
-    ) internal virtual override {
+    ) internal virtual {
         require(sender != address(0), "ERC20: transfer from the zero address");
         require(recipient != address(0), "ERC20: transfer to the zero address");
 

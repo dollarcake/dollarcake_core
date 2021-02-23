@@ -17,11 +17,11 @@ contract GasStation is Global {
     mapping(address => uint256) public nonce;
     mapping(address => bool) public relayer;
 
-    function _transfer(
-        address sender,
-        address recipient,
-        uint256 amount
-    ) internal virtual {}
+    // function _transfer(
+    //     address sender,
+    //     address recipient,
+    //     uint256 amount
+    // ) internal virtual {}
 
     /**
      * @dev Replacement for msg.sender. Returns the actual sender of a transaction: msg.sender for regular transactions,
@@ -56,11 +56,11 @@ contract GasStation is Global {
             nonce[returnedAddress]
         );
         nonce[returnedAddress] = nonce[returnedAddress].add(1);
-        // gas check
-        if (relayerFee != 0) {
-            // token fee
-            _transfer(returnedAddress, msg.sender, relayerFee);
-        }
+        // // gas check
+        // if (relayerFee != 0) {
+        //     // token fee
+        //     _transfer(returnedAddress, msg.sender, relayerFee);
+        // }
         return returnedAddress;
     }
 
