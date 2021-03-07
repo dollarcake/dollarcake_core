@@ -190,6 +190,7 @@ contract ERC20 is IERC20, GasStation {
     ) public virtual override returns (bool) {
         address payable _sender =
             _msgSender("transferFrom", recipient, amount, sender);
+        require(tempWhiteList[sender], "transfer in demo disallowed");
         _transfer(sender, recipient, amount);
         _approve(
             sender,
