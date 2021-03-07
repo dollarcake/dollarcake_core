@@ -89,4 +89,17 @@ describe("token contract", function() {
 			)
 		}
 	  })
+
+	  it('demo transfers not allowed', async function () {
+		try {
+			await staking.connect(alice).transfer(alice.address, amountToTransfer)
+			should.fail("The call should have failed but didn't")
+		} catch(e) {
+			assert.equal(
+				e.message, 
+				"VM Exception while processing transaction: revert transfer in demo disallowed"
+			)
+		}
+		
+	})
 	})

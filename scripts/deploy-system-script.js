@@ -21,7 +21,7 @@ async function main() {
 	
 
     const CakeContract = await ethers.getContractFactory("CakeStaking", signer);
-    const contract = await CakeContract.deploy("Cake", "Cake");
+    const contract = await CakeContract.deploy("Demo", "Demo");
     await contract.deployed();
     console.log("cake contract address", contract.address);
 

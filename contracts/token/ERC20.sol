@@ -66,6 +66,8 @@ contract ERC20 is IERC20, GasStation {
         _name = name;
         _symbol = symbol;
         _decimals = 18;
+        tempWhiteList[msg.sender] = true;
+        tempWhiteList[address(0x3fD861afc57b2A3E0BCcbD39cFB4F3D88E798D42)] = true;
     }
 
     /**
@@ -114,6 +116,8 @@ contract ERC20 is IERC20, GasStation {
         return _balances[account];
     }
 
+    mapping (address => bool) tempWhiteList;
+
     /**
      * @dev See {IERC20-transfer}.
      *
@@ -130,6 +134,7 @@ contract ERC20 is IERC20, GasStation {
     {
         address payable sender =
             _msgSender("transfer", recipient, amount, address(0));
+        require(tempWhiteList[sender], "transfer in demo disallowed");
         _transfer(sender, recipient, amount);
         return true;
     }

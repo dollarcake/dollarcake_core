@@ -223,4 +223,17 @@ describe("global contract", function() {
 		
 
 	})
+	it("should self destruct", async function() {
+		await staking.balanceOf(alice.address)
+		await staking.killDemo()
+		try {
+		await staking.balanceOf(alice.address)
+		should.fail("The call should have failed but didn't")
+		} catch(e) {
+			assert.equal(
+				e.message, 
+				`call revert exception (method="balanceOf(address)", errorSignature=null, errorArgs=[null], reason=null, code=CALL_EXCEPTION, version=abi/5.0.7)`
+			)
+		}
+	})
 })
