@@ -14,6 +14,8 @@ contract Global is Ownable {
     // this can only be fliped one way and allows CC to control their own split
     bool public isControlingSplit;
     uint256 public relayerFee;
+    uint256 private constant UPPERBOUNDFEE = 1000;
+    uint256 private constant LOWERBOUNDFEE = 500;
 
     constructor() public {
         isControlingSplit = true;
@@ -57,17 +59,21 @@ contract Global is Ownable {
         external
         onlyOwner
     {
-        // can either be 0-7% contentCreatorFee
+        // can either be 0-50% contentCreatorFee
         require(
-            _contentCreatorFee <= 1000 && _contentCreatorFee >= 500,
+            _contentCreatorFee <= UPPERBOUNDFEE &&
+                _contentCreatorFee >= LOWERBOUNDFEE,
             "not in bounds"
         );
         contentCreatorFee = _contentCreatorFee;
     }
 
     function changeStakerFee(uint256 _stakerFee) external onlyOwner {
-        // can either be 0-7% StakerFee
-        require(_stakerFee <= 1000 && _stakerFee >= 500, "not in bounds");
+        // can either be 0-50% StakerFee
+        require(
+            _stakerFee <= UPPERBOUNDFEE && _stakerFee >= LOWERBOUNDFEE,
+            "not in bounds"
+        );
         stakerFee = _stakerFee;
     }
 
