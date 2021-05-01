@@ -80,23 +80,25 @@ contract CakeStaking is ReentrancyGuard, CakeToken {
                     ? uint256(50)
                     : stakerSplit[_contentCreator[i]];
             }
-            uint256 amountMinusFee = _amount[i].mul(fee).div(1000);
-            uint256 dollarCakeFee = _amount[i].sub(amountMinusFee);
-            uint256 stakerReward = amountMinusFee.mul(_stakerSplit).div(100);
-            uint256 contentCreatorReward = amountMinusFee.sub(stakerReward);
+            uint256 stakerRewardBeforeFee = _amount[i].mul(_stakerSplit).div(100);
+            uint256 contentRewardBeforeFee = _amount[i].sub(stakerRewardBeforeFee);
+            uint256 stakerRewardAfterFee = stakerRewardBeforeFee.mul(stakerFee).div(1000);
+            uint256 contentRewardAfterFee = contentRewardBeforeFee.mul(contentCreatorFee).div(1000);
+            uint256 dollarCakeFee = _amount[i].sub(stakerRewardAfterFee).sub(contentRewardAfterFee);
+
             creatorStaked[_contentCreator[i]] = creatorStaked[
                 _contentCreator[i]
             ]
-                .add(stakerReward);
-
-            _transfer(msg.sender, address(this), stakerReward);
-            _transfer(msg.sender, _contentCreator[i], contentCreatorReward);
+                .add(stakerRewardAfterFee);
+            _transfer(msg.sender, address(this), stakerRewardAfterFee);
+            _transfer(msg.sender, _contentCreator[i], contentRewardAfterFee);
             _transfer(msg.sender, dollarCake, dollarCakeFee);
+
             emit Reward(
                 _contentCreator[i],
                 _amount[i],
-                stakerReward,
-                contentCreatorReward,
+                stakerRewardAfterFee,
+                contentRewardAfterFee,
                 dollarCakeFee
             );
         }
