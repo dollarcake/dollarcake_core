@@ -80,11 +80,16 @@ contract CakeStaking is ReentrancyGuard, CakeToken {
                     ? uint256(50)
                     : stakerSplit[_contentCreator[i]];
             }
-            uint256 stakerRewardBeforeFee = _amount[i].mul(_stakerSplit).div(100);
-            uint256 contentRewardBeforeFee = _amount[i].sub(stakerRewardBeforeFee);
-            uint256 stakerRewardAfterFee = stakerRewardBeforeFee.mul(stakerFee).div(1000);
-            uint256 contentRewardAfterFee = contentRewardBeforeFee.mul(contentCreatorFee).div(1000);
-            uint256 dollarCakeFee = _amount[i].sub(stakerRewardAfterFee).sub(contentRewardAfterFee);
+            uint256 stakerRewardBeforeFee =
+                _amount[i].mul(_stakerSplit).div(100);
+            uint256 contentRewardBeforeFee =
+                _amount[i].sub(stakerRewardBeforeFee);
+            uint256 stakerRewardAfterFee =
+                stakerRewardBeforeFee.mul(stakerFee).div(1000);
+            uint256 contentRewardAfterFee =
+                contentRewardBeforeFee.mul(contentCreatorFee).div(1000);
+            uint256 dollarCakeFee =
+                _amount[i].sub(stakerRewardAfterFee).sub(contentRewardAfterFee);
 
             creatorStaked[_contentCreator[i]] = creatorStaked[
                 _contentCreator[i]

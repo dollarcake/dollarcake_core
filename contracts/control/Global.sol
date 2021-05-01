@@ -23,7 +23,6 @@ contract Global is Ownable {
         dollarCake = msg.sender;
         contentCreatorFee = 950;
         stakerFee = 950;
-
     }
 
     function turnOffGlobalSplit() external onlyOwner {
@@ -54,9 +53,15 @@ contract Global is Ownable {
         timeLock = _timeLock;
     }
 
-    function changeContentCreatorFee(uint256 _contentCreatorFee) external onlyOwner {
+    function changeContentCreatorFee(uint256 _contentCreatorFee)
+        external
+        onlyOwner
+    {
         // can either be 0-7% contentCreatorFee
-        require(_contentCreatorFee <= 1000 && _contentCreatorFee >= 500, "not in bounds");
+        require(
+            _contentCreatorFee <= 1000 && _contentCreatorFee >= 500,
+            "not in bounds"
+        );
         contentCreatorFee = _contentCreatorFee;
     }
 
