@@ -10,7 +10,6 @@ const NULL_ADDRESS = `0x${"0".repeat(40)}`;
 
 describe("snapshot contract", function() {
   let owner, alice, bob, relayer, charlie, dave, eve;
-  let fee;
   const toTransfer = "100";
   const totalSupply = "10000000000000000000000000";
   beforeEach(async () => {
@@ -25,8 +24,7 @@ describe("snapshot contract", function() {
     ] = await ethers.getSigners();
     Contract = await ethers.getContractFactory("CakeStaking");
     staking = await Contract.deploy("cake", "cake");
-    fee = await staking.fee();
-    fee = fee / 1000;
+
   });
 
   it("should transfer and get snapshot", async () => {
@@ -125,7 +123,9 @@ describe("snapshot contract", function() {
       balanceOfAliceAt.toString(),
       "Alice should still have snapshot"
     );
-    await staking.changeFee(1000);
+    await staking.changeContentCreatorFee(1000);
+    await staking.changeStakerFee(1000);
+        
     await staking.reward([charlie.address], [aliceDeposit.toString()]);
 
     await increaseTime(ethers);
@@ -180,7 +180,10 @@ describe("snapshot contract", function() {
       balanceOfAliceAt.toString(),
       "Alice should still have snapshot"
     );
-    await staking.changeFee(1000);
+
+    await staking.changeContentCreatorFee(1000);
+    await staking.changeStakerFee(1000);
+
     await staking.reward([charlie.address], [aliceDeposit.toString()]);
     await staking.reward([eve.address], [aliceDeposit.toString()]);
 
@@ -314,7 +317,10 @@ describe("snapshot contract", function() {
       balanceOfAliceAt.toString(),
       "Alice should still have snapshot"
     );
-    await staking.changeFee(1000);
+    
+    await staking.changeContentCreatorFee(1000);
+    await staking.changeStakerFee(1000);
+      
     await staking.reward([charlie.address], [aliceDeposit.toString()]);
     await staking.reward([eve.address], [aliceDeposit.toString()]);
 

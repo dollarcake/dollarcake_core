@@ -132,14 +132,14 @@ describe("global contract", function() {
 			)
 		}
 	})
-	it("should change fee", async function() {
-		await staking.changeFee(940)
-		const fee = await staking.fee()
+	it("should change content fee", async function() {
+		await staking.changeContentCreatorFee(940)
+		const fee = await staking.contentCreatorFee()
 		assert.equal(fee, 940)
 	})
-	it("should fail to change fee non owner", async function() {
+	it("should fail to change content fee non owner", async function() {
 		try {
-			await staking.connect(alice).changeFee(940)
+			await staking.connect(alice).changeContentCreatorFee(940)
 			should.fail("The call should have failed but didn't")
 		} catch(e) {
 			assert.equal(
@@ -150,9 +150,9 @@ describe("global contract", function() {
 		
 
 	})
-	it("should fail to change fee too low", async function() {
+	it("should fail to change content fee too low", async function() {
 		try {
-			await staking.changeFee(929)
+			await staking.changeContentCreatorFee(499)
 			should.fail("The call should have failed but didn't")
 		} catch(e) {
 			assert.equal(
@@ -161,9 +161,49 @@ describe("global contract", function() {
 			)
 		}
 	})
-	it("should fail to change fee too high", async function() {
+	it("should fail to change content fee too high", async function() {
 		try {
-			await staking.changeFee(1001)
+			await staking.changeContentCreatorFee(1001)
+			should.fail("The call should have failed but didn't")
+		} catch(e) {
+			assert.equal(
+				e.message, 
+				"VM Exception while processing transaction: revert not in bounds"
+			)
+		}
+	})
+	it("should change staker fee", async function() {
+		await staking.changeStakerFee(940)
+		const fee = await staking.stakerFee()
+		assert.equal(fee, 940)
+	})
+	it("should fail to change staker fee non owner", async function() {
+		try {
+			await staking.connect(alice).changeStakerFee(940)
+			should.fail("The call should have failed but didn't")
+		} catch(e) {
+			assert.equal(
+				e.message, 
+				"VM Exception while processing transaction: revert Ownable: caller is not the owner"
+			)
+		}
+		
+
+	})
+	it("should fail to change staker fee too low", async function() {
+		try {
+			await staking.changeStakerFee(499)
+			should.fail("The call should have failed but didn't")
+		} catch(e) {
+			assert.equal(
+				e.message, 
+				"VM Exception while processing transaction: revert not in bounds"
+			)
+		}
+	})
+	it("should fail to change staker fee too high", async function() {
+		try {
+			await staking.changeStakerFee(1001)
 			should.fail("The call should have failed but didn't")
 		} catch(e) {
 			assert.equal(

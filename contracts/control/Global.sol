@@ -8,11 +8,14 @@ contract Global is Ownable {
     uint256 public minInitialDeposit;
     uint256 public globalStakerSplit;
     uint256 public timeLock;
-    uint256 public fee;
+    uint256 public contentCreatorFee;
+    uint256 public stakerFee;
     address public dollarCake;
     // this can only be fliped one way and allows CC to control their own split
     bool public isControlingSplit;
     uint256 public relayerFee;
+    uint256 private constant UPPERBOUNDFEE = 1000;
+    uint256 private constant LOWERBOUNDFEE = 500;
 
     constructor() public {
         isControlingSplit = true;
@@ -20,7 +23,8 @@ contract Global is Ownable {
         minInitialDeposit = 10 ether;
         timeLock = 30 days;
         dollarCake = msg.sender;
-        fee = 950;
+        contentCreatorFee = 950;
+        stakerFee = 950;
     }
 
     function turnOffGlobalSplit() external onlyOwner {
@@ -51,10 +55,26 @@ contract Global is Ownable {
         timeLock = _timeLock;
     }
 
-    function changeFee(uint256 _fee) external onlyOwner {
-        // can either be 0-7% fee
-        require(_fee <= 1000 && _fee >= 930, "not in bounds");
-        fee = _fee;
+    function changeContentCreatorFee(uint256 _contentCreatorFee)
+        external
+        onlyOwner
+    {
+        // can either be 0-50% contentCreatorFee
+        require(
+            _contentCreatorFee <= UPPERBOUNDFEE &&
+                _contentCreatorFee >= LOWERBOUNDFEE,
+            "not in bounds"
+        );
+        contentCreatorFee = _contentCreatorFee;
+    }
+
+    function changeStakerFee(uint256 _stakerFee) external onlyOwner {
+        // can either be 0-50% StakerFee
+        require(
+            _stakerFee <= UPPERBOUNDFEE && _stakerFee >= LOWERBOUNDFEE,
+            "not in bounds"
+        );
+        stakerFee = _stakerFee;
     }
 
     function changeDollarCakeAddress(address _dollarCake) external onlyOwner {

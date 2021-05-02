@@ -13,7 +13,9 @@ describe("long form staking contract", function() {
 		[owner, alice, bob, relayer, charlie, dave, erin] = await ethers.getSigners();
         Contract = await ethers.getContractFactory("CakeStaking");
 		staking = await Contract.deploy("cake", "cake");
-		fee = await staking.fee()
+		const stakerFee = await staking.stakerFee()
+		const contentFee = await staking.contentCreatorFee()
+		fee = stakerFee.add(contentFee) / 2
 		fee = fee / 1000
 	});
 	it("should deposit and withdraw alice bob dave while extra tokens added before bob and charlies deposits to multiple creators", async function() {
